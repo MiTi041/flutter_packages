@@ -26,7 +26,13 @@ class EmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, color: text == null ? constants.subFontColor : constants.fontColor, fontWeight: constants.semi),
+              style: TextStyle(
+                height: 1,
+                fontFamily: constants.fontFamily,
+                fontSize: constants.semibigFontSize,
+                color: text == null ? constants.subFontColor : constants.fontColor,
+                fontWeight: constants.semi,
+              ),
             ),
             if (text != null)
               Column(
@@ -35,7 +41,7 @@ class EmptyState extends StatelessWidget {
                   Text(
                     text!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.subFontColor, fontWeight: constants.medium),
+                    style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.subFontColor, fontWeight: constants.medium),
                   ),
                 ],
               ),

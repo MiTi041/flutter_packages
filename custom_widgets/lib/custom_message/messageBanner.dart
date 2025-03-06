@@ -9,12 +9,7 @@ class MessageBanner extends StatefulWidget {
   final MessageType type;
   final VoidCallback? close;
 
-  const MessageBanner({
-    required this.text,
-    this.type = MessageType.info,
-    this.close,
-    super.key,
-  });
+  const MessageBanner({required this.text, this.type = MessageType.info, this.close, super.key});
 
   @override
   MessageBannerState createState() => MessageBannerState();
@@ -76,36 +71,16 @@ class MessageBannerState extends State<MessageBanner> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: _getBannerColor(constants),
-        borderRadius: BorderRadius.circular(10),
-      ),
+      decoration: BoxDecoration(color: _getBannerColor(constants), borderRadius: BorderRadius.circular(12)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset(
-            _getBannerIcon(),
-            height: 20,
-          ),
+          Image.asset(_getBannerIcon(), height: 20),
           const Gap(5),
           Flexible(
-            child: Text(
-              widget.text,
-              style: TextStyle(
-                fontFamily: constants.fontFamily,
-                fontSize: constants.regularFontSize,
-                color: _getTextColor(constants),
-                fontWeight: constants.medium,
-              ),
-            ),
+            child: Text(widget.text, style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: _getTextColor(constants), fontWeight: constants.medium)),
           ),
-          if (widget.close != null) ...[
-            const Gap(10),
-            IconButton(
-              icon: Icon(Icons.close, color: _getTextColor(constants)),
-              onPressed: widget.close,
-            ),
-          ],
+          if (widget.close != null) ...[const Gap(10), IconButton(icon: Icon(Icons.close, color: _getTextColor(constants)), onPressed: widget.close)],
         ],
       ),
     );

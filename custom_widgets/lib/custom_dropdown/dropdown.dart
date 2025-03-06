@@ -10,14 +10,7 @@ class Dropdown extends StatefulWidget {
   final Future<bool> Function(String)? selection;
   final dynamic preSelected;
 
-  const Dropdown({
-    required this.title,
-    required this.text,
-    required this.items,
-    this.preSelected,
-    this.selection,
-    super.key,
-  });
+  const Dropdown({required this.title, required this.text, required this.items, this.preSelected, this.selection, super.key});
 
   @override
   DropdownState createState() => DropdownState();
@@ -129,115 +122,89 @@ class DropdownState extends State<Dropdown> {
     getWidgetPosition();
 
     overlayEntry = OverlayEntry(
-      builder: (context) => Stack(
-        children: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                isFocused = false;
-                removeOverlay();
-              });
-            },
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: constants.background.withValues(alpha: 0.4),
-                      ),
+      builder:
+          (context) => Stack(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isFocused = false;
+                    removeOverlay();
+                  });
+                },
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), child: Container(decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.4)))),
                     ),
-                  ),
+                    Container(height: MediaQuery.of(context).size.height, width: MediaQuery.of(context).size.width, decoration: const BoxDecoration(color: Colors.transparent)),
+                  ],
                 ),
-                Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: const BoxDecoration(
+              ),
+              Center(
+                child: SafeArea(
+                  child: Material(
                     color: Colors.transparent,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: SafeArea(
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  margin: const EdgeInsets.all(15),
-                  width: MediaQuery.of(context).size.width,
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height / 2,
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: constants.secondary,
-                        width: 1,
-                      ),
-                      color: constants.background,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
                     child: Container(
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      margin: const EdgeInsets.all(5),
-                      child: CustomScrollView(
-                        shrinkWrap: true,
-                        controller: scrollController,
-                        physics: const BouncingScrollPhysics(
-                          parent: AlwaysScrollableScrollPhysics(),
-                        ),
-                        slivers: <Widget>[
-                          SliverToBoxAdapter(
-                            child: Wrap(
-                              alignment: WrapAlignment.start,
-                              runAlignment: WrapAlignment.start,
-                              runSpacing: 3,
-                              children: widget.items
-                                  .map(
-                                    (List<dynamic> item) => GestureDetector(
-                                      onTap: () {
-                                        select(item[0]);
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.all(15),
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: selectedValue == item[1] ? constants.third : null,
-                                          borderRadius: BorderRadius.circular(5),
-                                        ),
-                                        child: Text(
-                                          item[1],
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                            fontFamily: constants.fontFamily,
-                                            fontSize: constants.regularFontSize,
-                                            color: constants.fontColor,
-                                            fontWeight: constants.medium,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
+                      margin: const EdgeInsets.all(15),
+                      width: MediaQuery.of(context).size.width,
+                      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 2),
+                      child: Container(
+                        decoration: BoxDecoration(border: Border.all(color: constants.secondary, width: 1), color: constants.background, borderRadius: BorderRadius.circular(12)),
+                        child: Container(
+                          clipBehavior: Clip.hardEdge,
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
+                          margin: const EdgeInsets.all(5),
+                          child: CustomScrollView(
+                            shrinkWrap: true,
+                            controller: scrollController,
+                            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                            slivers: <Widget>[
+                              SliverToBoxAdapter(
+                                child: Wrap(
+                                  alignment: WrapAlignment.start,
+                                  runAlignment: WrapAlignment.start,
+                                  runSpacing: 3,
+                                  children:
+                                      widget.items
+                                          .map(
+                                            (List<dynamic> item) => GestureDetector(
+                                              onTap: () {
+                                                select(item[0]);
+                                              },
+                                              child: Container(
+                                                padding: const EdgeInsets.all(15),
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(color: selectedValue == item[1] ? constants.third : null, borderRadius: BorderRadius.circular(6)),
+                                                child: Text(
+                                                  item[1],
+                                                  maxLines: 1,
+                                                  style: TextStyle(
+                                                    height: 1,
+                                                    fontFamily: constants.fontFamily,
+                                                    fontSize: constants.regularFontSize,
+                                                    color: constants.fontColor,
+                                                    fontWeight: constants.medium,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
     );
 
     Overlay.of(context).insert(overlayEntry!);
@@ -267,11 +234,8 @@ class DropdownState extends State<Dropdown> {
             width: double.infinity,
             decoration: BoxDecoration(
               color: isFocused ? constants.secondary : constants.primary,
-              border: Border.all(
-                color: isFocused ? constants.blue : constants.secondary,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: isFocused ? constants.blue : constants.secondary, width: 1),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -287,6 +251,7 @@ class DropdownState extends State<Dropdown> {
                         softWrap: true,
                         maxLines: null,
                         style: TextStyle(
+                          height: 1,
                           fontFamily: constants.fontFamily,
                           fontSize: constants.regularFontSize,
                           color: constants.subFontColor,
@@ -300,6 +265,7 @@ class DropdownState extends State<Dropdown> {
                         softWrap: true,
                         maxLines: null,
                         style: TextStyle(
+                          height: 1,
                           fontFamily: constants.fontFamily,
                           fontSize: constants.semibigFontSize,
                           color: constants.fontColor,
@@ -312,13 +278,7 @@ class DropdownState extends State<Dropdown> {
                 ),
                 Container(
                   margin: const EdgeInsets.only(left: 15),
-                  child: Transform.rotate(
-                    angle: (isFocused ? 0.5 : 1.5) * 3.1415927,
-                    child: SizedBox(
-                      height: 10,
-                      child: Image.asset('${constants.imgPath}arrowBack.png'),
-                    ),
-                  ),
+                  child: Transform.rotate(angle: (isFocused ? 0.5 : 1.5) * 3.1415927, child: SizedBox(height: 10, child: Image.asset('${constants.imgPath}arrowBack.png'))),
                 ),
               ],
             ),

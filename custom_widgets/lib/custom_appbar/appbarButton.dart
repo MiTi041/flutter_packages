@@ -11,15 +11,7 @@ class AppbarButton extends StatelessWidget {
 
   final VoidCallback? click;
 
-  const AppbarButton({
-    this.text,
-    this.icon,
-    this.color,
-    this.fontColor,
-    this.borderColor,
-    this.click,
-    super.key,
-  });
+  const AppbarButton({this.text, this.icon, this.color, this.fontColor, this.borderColor, this.click, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,40 +23,17 @@ class AppbarButton extends StatelessWidget {
       },
       child: Container(
         height: 30,
-        constraints: const BoxConstraints(
-          minWidth: 30,
-        ),
+        constraints: const BoxConstraints(minWidth: 30),
         padding: EdgeInsets.fromLTRB(text != null ? 15 : 0, 0, text != null ? 15 : 0, 0),
-        decoration: BoxDecoration(
-          color: color ?? constants.primary,
-          border: Border.all(color: borderColor ?? constants.secondary, width: 1),
-          borderRadius: BorderRadius.circular(50),
-        ),
+        decoration: BoxDecoration(color: color ?? constants.primary, border: Border.all(color: borderColor ?? constants.secondary, width: 1), borderRadius: BorderRadius.circular(50)),
         child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null)
-                Row(
-                  children: [
-                    SizedBox(
-                      height: 15,
-                      width: 15,
-                      child: Image.asset('${constants.imgPath}${icon!}'),
-                    ),
-                  ],
-                ),
+              if (icon != null) Row(children: [SizedBox(height: 15, width: 15, child: Image.asset('${constants.imgPath}${icon!}'))]),
               if (icon != null && text != null) const Gap(5),
               if (text != null)
-                Text(
-                  text!,
-                  style: TextStyle(
-                    fontFamily: constants.fontFamily,
-                    fontSize: constants.mediumFontSize,
-                    color: fontColor ?? constants.fontColor,
-                    fontWeight: constants.bold,
-                  ),
-                ),
+                Text(text!, style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: fontColor ?? constants.fontColor, fontWeight: constants.bold)),
             ],
           ),
         ),

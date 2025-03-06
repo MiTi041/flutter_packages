@@ -14,6 +14,7 @@ class Constants {
     FontWeight? medium,
     FontWeight? regular,
     Color? green,
+    Color? purple,
     Color? red,
     Color? blue,
     Color? orange,
@@ -39,11 +40,12 @@ class Constants {
       semi: semi ?? FontWeight.w600,
       medium: medium ?? FontWeight.w500,
       regular: regular ?? FontWeight.w400,
-      green: green ?? const Color(0xFF53D377),
+      green: green ?? const Color(0xFF21993C),
+      purple: purple ?? const Color(0xFF4846C1),
       red: red ?? const Color(0xFFD35353),
-      blue: blue ?? const Color(0xFF2D64E3),
+      blue: blue ?? const Color(0xFF0A67DA),
       orange: orange ?? const Color(0xFFD37253),
-      pink: pink ?? const Color(0xFF8E0446),
+      pink: pink ?? const Color(0xFFE12B4B),
       yellow: yellow ?? const Color(0xFFEAE33E),
       darkgreen: darkgreen ?? const Color(0xFF3D7E4B),
       background: background ?? const Color(0xFF121212),
@@ -70,6 +72,7 @@ class Constants {
     required this.medium,
     required this.regular,
     required this.green,
+    required this.purple,
     required this.red,
     required this.blue,
     required this.orange,
@@ -98,6 +101,7 @@ class Constants {
   final FontWeight regular;
 
   final Color green;
+  final Color purple;
   final Color red;
   final Color blue;
   final Color orange;

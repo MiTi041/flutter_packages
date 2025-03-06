@@ -4,7 +4,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:custom_widgets/constants.dart';
 
 class Input extends StatefulWidget {
-  final bool backgroundSecondary;
   final String text;
   final String Function(String)? input;
   final bool maxHeight;
@@ -14,9 +13,10 @@ class Input extends StatefulWidget {
   final bool disabled;
   final String? value;
   final Constants? constants;
+  final BorderRadius borderRadius;
+  final Color? backgroundColor;
 
   const Input({
-    this.backgroundSecondary = false,
     required this.text,
     this.input,
     this.maxHeight = false,
@@ -26,6 +26,8 @@ class Input extends StatefulWidget {
     this.disabled = false,
     this.value,
     this.constants,
+    this.borderRadius = const BorderRadius.all(Radius.circular(9)),
+    this.backgroundColor,
     super.key,
   });
 
@@ -41,6 +43,7 @@ class InputState extends State<Input> {
   FocusNode focusNode = FocusNode();
   Timer? _scrollTimer;
   double keyboardHeight = 0;
+  late Color backgroundColor;
 
   @override
   void initState() {
@@ -50,6 +53,12 @@ class InputState extends State<Input> {
       constants = Constants();
     } else {
       constants = widget.constants!;
+    }
+
+    if (widget.backgroundColor == null) {
+      backgroundColor = constants.primary;
+    } else {
+      backgroundColor = widget.backgroundColor!;
     }
 
     if (widget.value != null) {
@@ -128,6 +137,7 @@ class InputState extends State<Input> {
       child: Stack(
         children: [
           TextField(
+            cursorColor: constants.fontColor,
             autocorrect: false,
             keyboardType: widget.currency ? const TextInputType.numberWithOptions(decimal: true) : null,
             onTapOutside: (value) {
@@ -177,31 +187,26 @@ class InputState extends State<Input> {
                 inputText = value;
               });
             },
+
             enabled: !widget.disabled,
             textAlign: TextAlign.start,
             decoration: InputDecoration(
               isDense: true,
-              contentPadding: EdgeInsets.only(left: widget.loader || widget.finished ? 35 : 15, top: widget.maxHeight ? 28 : 15, bottom: widget.maxHeight ? 28 : 17, right: 45),
-              fillColor:
-                  isFocused
-                      ? widget.backgroundSecondary
-                          ? constants.third
-                          : constants.secondary
-                      : widget.backgroundSecondary
-                      ? constants.secondary
-                      : constants.primary,
+              contentPadding: EdgeInsets.only(left: widget.loader || widget.finished ? 35 : 15, top: widget.maxHeight ? 28 : 10, bottom: widget.maxHeight ? 28 : 11, right: 15),
+              fillColor: backgroundColor,
               filled: true,
               counterText: '',
-              labelText: widget.text,
-              labelStyle: TextStyle(
+              hintText: widget.text,
+              hintStyle: TextStyle(
+                height: 1,
                 overflow: TextOverflow.ellipsis,
                 fontFamily: constants.fontFamily,
-                fontSize: constants.regularFontSize,
+                fontSize: constants.mediumFontSize,
                 color: constants.subFontColor,
                 fontWeight: constants.medium,
               ),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(color: constants.blue, width: 1)),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: const BorderSide(width: 0, style: BorderStyle.none)),
+              //focusedBorder: OutlineInputBorder(borderRadius: widget.borderRadius, borderSide: BorderSide(color: constants.blue, width: 1)),
+              border: OutlineInputBorder(borderRadius: widget.borderRadius, borderSide: const BorderSide(width: 0, style: BorderStyle.none)),
             ),
             textAlignVertical: TextAlignVertical.center,
             style: TextStyle(
@@ -209,41 +214,30 @@ class InputState extends State<Input> {
               decorationThickness: 0,
               overflow: TextOverflow.fade,
               fontFamily: constants.fontFamily,
-              fontSize: constants.mediumFontSize,
+              fontSize: constants.semibigFontSize,
               color: constants.fontColor,
-              fontWeight: constants.medium,
+              fontWeight: constants.semi,
             ),
           ),
-          if (inputText != "" && !widget.backgroundSecondary)
-            Positioned(
-              right: 15,
-              top: 15,
-              bottom: 15,
-              child: GestureDetector(
-                onTap: () {
-                  FocusScope.of(context).requestFocus(focusNode);
-                  controller.text = "";
-                  setState(() {
-                    inputText = "";
-                  });
-                  if (widget.input != null) {
-                    widget.input!("");
-                  }
-                },
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(color: constants.third, borderRadius: BorderRadius.circular(50)),
-                        child: SizedBox(height: 10, width: 10, child: Image.asset('${constants.imgPath}cross.png')),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          //if (inputText != "" && !widget.backgroundSecondary)
+          //  Positioned(
+          //    right: 10,
+          //    top: 0,
+          //    bottom: 0,
+          //    child: GestureDetector(
+          //      onTap: () {
+          //        FocusScope.of(context).requestFocus(focusNode);
+          //        controller.text = "";
+          //        setState(() {
+          //          inputText = "";
+          //        });
+          //        if (widget.input != null) {
+          //          widget.input!("");
+          //        }
+          //      },
+          //      child: Icon(CupertinoIcons.xmark_circle_fill, color: constants.fontColor, size: 20),
+          //    ),
+          //  ),
           widget.loader
               ? Positioned(left: 15, top: 15, bottom: 15, child: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [SpinKitRing(lineWidth: 2.0, color: constants.fontColor, size: 15)])))
               : widget.finished

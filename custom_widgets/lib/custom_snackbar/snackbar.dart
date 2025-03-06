@@ -1,18 +1,17 @@
+import 'dart:async';
+import 'package:custom_widgets/custom_snackbar/snackBarStatus.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
-import 'package:custom_widgets/custom_snackBar/snackBar_provider.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:custom_widgets/custom_button/button.dart';
-
-/// SnackBarProvider().showSnackBar(context, status: SnackBarStatus.success, text: "Der Beitrag wurde kommentiert");
 
 class CustomSnackbar extends StatefulWidget {
   final String text;
   final SnackBarStatus status;
   final Button? button;
+  final Function slideUpSnackBar;
 
-  const CustomSnackbar({required this.text, this.status = SnackBarStatus.normal, this.button, super.key});
+  const CustomSnackbar({required this.slideUpSnackBar, required this.text, this.status = SnackBarStatus.normal, this.button, super.key});
 
   @override
   CustomSnackbarState createState() => CustomSnackbarState();
@@ -21,11 +20,41 @@ class CustomSnackbar extends StatefulWidget {
 class CustomSnackbarState extends State<CustomSnackbar> {
   final GlobalKey snackbarKey = GlobalKey();
   double height = 100;
+  Timer? timerStart;
+  Timer? timerSlideUp;
+  Timer? timerClose;
+  bool isSliding = false;
+
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+
+    // Höhe des Snackbars nach der ersten Frame aktualisieren
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateHeight());
+
+    // Start der Animation mit einer kurzen Verzögerung
+    timerStart = Timer(const Duration(milliseconds: 50), () {
+      setState(() {
+        isSliding = true; // Starten der Aufwärtsbewegung
+      });
+    });
+
+    // Nach 2 Sekunden die Snackbar wieder nach unten schieben und Callback auslösen
+    timerSlideUp = Timer(const Duration(seconds: 2), () {
+      setState(() {
+        isSliding = false; // Starten der Aufwärtsbewegung
+      });
+      timerClose = Timer(const Duration(milliseconds: 150), () {
+        widget.slideUpSnackBar();
+      });
+    });
   }
 
   void _updateHeight() {
@@ -37,23 +66,39 @@ class CustomSnackbarState extends State<CustomSnackbar> {
     }
   }
 
+  void slideUpSnackBar() {
+    setState(() {
+      isSliding = false; // Starten der Aufwärtsbewegung
+    });
+    timerClose = Timer(const Duration(milliseconds: 150), () {
+      widget.slideUpSnackBar();
+    });
+  }
+
+  @override
+  void dispose() {
+    timerStart?.cancel();
+    timerSlideUp?.cancel();
+    timerClose?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final constants = Constants();
-    final snackBarProvider = Provider.of<SnackBarProvider>(context, listen: true);
 
     final Color backgroundColor = _getBackgroundColor(widget.status);
     final Color lineColor = _getLineColor(widget.status);
 
     return AnimatedPositioned(
-      duration: const Duration(milliseconds: 125),
-      top: snackBarProvider.isSliding ? 0 : -height,
+      duration: const Duration(milliseconds: 100),
+      top: isSliding ? 0 : -height, // Top-Wert steuert die Position
       left: 0,
       right: 0,
       child: Material(
         color: constants.background,
         child: GestureDetector(
-          onHorizontalDragEnd: (_) => snackBarProvider.slideUpSnackBar(),
+          onHorizontalDragEnd: (_) => slideUpSnackBar(),
           child: Container(
             key: snackbarKey,
             width: double.infinity,
@@ -65,9 +110,14 @@ class CustomSnackbarState extends State<CustomSnackbar> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (_getIconPath(widget.status) != null) Row(children: [Image.asset(_getIconPath(widget.status)!, height: 30, width: 30), const Gap(10)]),
-                    Expanded(child: Text(widget.text, style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: constants.fontColor, fontWeight: constants.semi))),
+                    Expanded(
+                      child: Text(
+                        widget.text,
+                        style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: constants.fontColor, fontWeight: constants.semi),
+                      ),
+                    ),
                     GestureDetector(
-                      onTap: () => snackBarProvider.slideUpSnackBar(),
+                      onTap: () => slideUpSnackBar(),
                       child: Container(
                         height: 30,
                         width: 30,

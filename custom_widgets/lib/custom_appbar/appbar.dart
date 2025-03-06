@@ -88,11 +88,8 @@ class AppbarState extends State<Appbar> with Navigate {
               opacity: 1 - widget.opacity,
               child: ClipRRect(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                  child: Container(
-                    decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.5), border: Border(bottom: BorderSide(color: constants.primary, width: 0.5))),
-                    height: appBarHeight,
-                  ),
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.8)), height: appBarHeight),
                 ),
               ),
             ),
@@ -122,19 +119,19 @@ class AppbarState extends State<Appbar> with Navigate {
                             child: Center(child: SizedBox(height: 15, width: 15, child: Image.asset('${constants.imgPath}arrowBack.png'))),
                           ),
                         ),
-                        const Gap(10),
                       ],
                       Expanded(
                         child: Container(
                           constraints: const BoxConstraints(minWidth: 0.0, maxWidth: double.infinity),
                           child: Row(
+                            mainAxisAlignment: widget.isModalPopup ? MainAxisAlignment.center : MainAxisAlignment.start,
                             children: [
                               if (widget.icon != null) ...[SizedBox(height: 20, child: widget.icon), const Gap(10)],
                               if (widget.titel != null)
                                 Text(
                                   widget.titel!,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.bigFontSize, color: constants.fontColor, fontWeight: constants.bold),
+                                  style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, color: constants.fontColor, fontWeight: constants.medium),
                                 ),
                             ],
                           ),
@@ -143,12 +140,14 @@ class AppbarState extends State<Appbar> with Navigate {
                     ],
                   ),
                 ),
-                const Gap(10),
-                widget.actions != null && widget.actions!.isNotEmpty
-                    ? Wrap(spacing: 10, runSpacing: 10, children: [for (var action in widget.actions!) action])
-                    : widget.isModalPopup
-                    ? const Gap(0)
-                    : const Gap(30),
+                if (widget.actions != null && widget.actions!.isNotEmpty) ...[
+                  const Gap(10),
+                  widget.actions != null
+                      ? Wrap(spacing: 10, runSpacing: 10, children: [for (var action in widget.actions!) action])
+                      : widget.isModalPopup
+                      ? const Gap(0)
+                      : const Gap(30),
+                ],
               ],
             ),
           ),

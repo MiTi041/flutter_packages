@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:custom_widgets/custom_list/refresh_provider.dart';
 import 'package:custom_utils/custom_supabaseHelper.dart';
 import 'package:custom_widgets/custom_list/dateGrouper.dart';
+import 'package:custom_widgets/custom_siteSelection/siteSelectionItem.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fadein/flutter_fadein.dart';
 import 'package:gap/gap.dart';
@@ -9,8 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:custom_widgets/custom_frame/frame_provider.dart';
 import 'package:custom_widgets/custom_emptyState/emptyState.dart';
 import 'package:custom_widgets/custom_searchbar/searchbar.dart';
-import 'package:custom_widgets/custom_siteSlider/siteSelection.dart';
-import 'package:custom_widgets/custom_siteSlider/siteSlider.dart';
+import 'package:custom_widgets/custom_siteSelection/siteSelection.dart';
 import 'package:custom_widgets/custom_skeleton/skeleton.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:custom_widgets/custom_titel/titel.dart';
@@ -21,8 +21,9 @@ class QueryInfo {
   final String? filterByColumn;
   final String orderByColumn;
   final bool ascending;
+  final List<List<dynamic>>? where;
 
-  QueryInfo({required this.table, this.filterByColumn, required this.orderByColumn, this.ascending = false});
+  QueryInfo({required this.table, this.filterByColumn, required this.orderByColumn, this.ascending = false, this.where});
 }
 
 class CustomListWidget {
@@ -30,7 +31,7 @@ class CustomListWidget {
   final Widget Function(int id) object;
   final int? skeletonHeight;
   final double skeletonBorderRadius;
-  final String? siteSliderTitel;
+  final SiteSelectionItem? siteSelectionItem;
   final List<Map<String, dynamic>>? ownDataList;
   final int? searchParamCount;
   final Widget? customSkeleton;
@@ -47,7 +48,7 @@ class CustomListWidget {
     required this.object,
     this.skeletonHeight,
     this.skeletonBorderRadius = 15,
-    this.siteSliderTitel,
+    this.siteSelectionItem,
     this.ownDataList,
     this.searchParamCount,
     this.customSkeleton,
@@ -64,22 +65,12 @@ class CustomListWidget {
 class CustomList extends StatefulWidget {
   final bool showSearchbar;
   final List<CustomListWidget> widgets;
-  final bool showSiteSliderNotSideSelection;
   final bool useRefreshProvider;
   final bool searchbarOnOpenFocus;
   final void Function(bool)? isSearching;
   final void Function(int)? changedOffset;
 
-  const CustomList({
-    this.showSearchbar = false,
-    required this.widgets,
-    this.showSiteSliderNotSideSelection = false,
-    this.useRefreshProvider = false,
-    this.searchbarOnOpenFocus = false,
-    this.isSearching,
-    this.changedOffset,
-    super.key,
-  });
+  const CustomList({this.showSearchbar = false, required this.widgets, this.useRefreshProvider = false, this.searchbarOnOpenFocus = false, this.isSearching, this.changedOffset, super.key});
 
   @override
   CustomListState createState() => CustomListState();
@@ -89,8 +80,8 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
   List<List<Map<String, dynamic>?>> data = [];
   String searchbarValue = "";
   bool isLoading = true;
-  List<String> siteSliderTitles = [];
-  int siteSliderTitlesLength = 0;
+  List<SiteSelectionItem> siteSelectionItems = [];
+  int siteSelectionItemsLength = 0;
   int sliderSelection = 0;
   late int n;
   late double spacing;
@@ -124,10 +115,11 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
 
     calculateContentConstraints();
 
-    siteSliderTitles = widget.widgets.map((w) => w.siteSliderTitel).whereType<String>().toList();
-    siteSliderTitlesLength = siteSliderTitles.isNotEmpty ? siteSliderTitles.length : 1;
+    siteSelectionItems = widget.widgets.map((w) => w.siteSelectionItem).whereType<SiteSelectionItem>().toList();
 
-    data = List.generate(siteSliderTitlesLength, (_) => [null]);
+    siteSelectionItemsLength = siteSelectionItems.isNotEmpty ? siteSelectionItems.length : 1;
+
+    data = List.generate(siteSelectionItemsLength, (_) => [null]);
 
     refreshProvider = Provider.of<RefreshProvider>(context, listen: false);
     if (widget.useRefreshProvider) refreshProvider.addListener(refreshProviderListener);
@@ -156,8 +148,10 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
   }
 
   Future<void> refresh() async {
-    resetList();
-    await load(withoutLoading: true);
+    setState(() {
+      resetList();
+    });
+    await load();
   }
 
   void refreshProviderListener() {
@@ -196,29 +190,31 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
         selectString = 'id, ${widgetConfig.dateColumnName}';
       }
 
-      if (queryInfo.filterByColumn != null && searchbarValue.isNotEmpty) {
-        String filterColumn = queryInfo.filterByColumn!;
+      String filterColumn = queryInfo.filterByColumn!;
 
-        results = await Supabase.instance.client
-            .from(queryInfo.table)
-            .select(selectString)
-            .ilike(filterColumn, '$searchbarValue%')
-            .order(queryInfo.orderByColumn, ascending: queryInfo.ascending)
-            .range(offset, offset + limit - 1);
-      } else {
-        results = await Supabase.instance.client
-            .from(queryInfo.table)
-            .select(selectString)
-            .order(widgetConfig.dateColumnName != null ? widgetConfig.dateColumnName! : queryInfo.orderByColumn, ascending: queryInfo.ascending)
-            .range(offset, offset + limit - 1);
+      // Anwendung der where-Bedingung
+      var query = Supabase.instance.client.from(queryInfo.table).select(selectString);
+
+      // Optionales where hinzufügen, falls vorhanden
+      if (queryInfo.where != null) {
+        for (var where in queryInfo.where!) {
+          query = query.eq(where[0], where[1]);
+        }
       }
+
+      if (queryInfo.filterByColumn != null && searchbarValue.isNotEmpty) {
+        // Anwendung der ilike-Bedingung für die Filterung
+        query = query.ilike(filterColumn, '$searchbarValue%');
+      }
+
+      // Abfrage ausführen mit optionaler Sortierung und Paginierung
+      results = await query.order(widgetConfig.dateColumnName != null ? widgetConfig.dateColumnName! : queryInfo.orderByColumn, ascending: queryInfo.ascending).range(offset, offset + limit - 1);
 
       // Wenn es eine Datumsspalte gibt, benenne sie um
       if (widgetConfig.dateColumnName != null) {
-        results =
-            results.map((item) {
-              return {...item, 'date': item[widgetConfig.dateColumnName]};
-            }).toList();
+        results = results.map((item) {
+          return {...item, 'date': item[widgetConfig.dateColumnName]};
+        }).toList();
       }
 
       // Prüfen, ob noch Daten vorhanden sind
@@ -524,24 +520,17 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
                 return value;
               },
             ),
-          if (siteSliderTitles.length > 1)
-            widget.showSiteSliderNotSideSelection
-                ? SiteSlider(
-                  preSelectedIndex: preSelectedIndex,
-                  items: siteSliderTitles,
-                  select: (int value) {
-                    select(value);
-                    return value;
-                  },
-                )
-                : SiteSelection(
-                  preSelectedIndex: preSelectedIndex,
-                  items: siteSliderTitles,
-                  select: (int value) {
-                    select(value);
-                    return value;
-                  },
-                ),
+          if (siteSelectionItems.length > 1) ...[
+            const Gap(10),
+            SiteSelection(
+              preSelectedIndex: preSelectedIndex,
+              items: siteSelectionItems,
+              select: (int value) {
+                select(value);
+                return value;
+              },
+            ),
+          ],
           const Gap(15),
           SizedBox(
             width: double.infinity,
@@ -550,31 +539,29 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
               runAlignment: WrapAlignment.start,
               spacing: spacing,
               runSpacing: spacing,
-              children:
-                  isLoading
-                      ? widget.widgets[sliderSelection].showNotTheSkeleton
-                          ? []
-                          : List.generate(
-                            n * 5,
-                            (_) => SizedBox(
-                              width: itemWidth,
-                              child: FadeIn(
-                                child:
-                                    widget.widgets[sliderSelection].customSkeleton ??
-                                    Skeleton(
-                                      borderRadius: widget.widgets[sliderSelection].skeletonBorderRadius,
-                                      height: (widget.widgets[sliderSelection].skeletonHeight ?? Random().nextInt(100) + 200).toDouble(),
-                                    ),
-                              ),
+              children: isLoading
+                  ? widget.widgets[sliderSelection].showNotTheSkeleton
+                      ? []
+                      : List.generate(
+                          n * 5,
+                          (_) => SizedBox(
+                            width: itemWidth,
+                            child: FadeIn(
+                              child: widget.widgets[sliderSelection].customSkeleton ??
+                                  Skeleton(
+                                    borderRadius: widget.widgets[sliderSelection].skeletonBorderRadius,
+                                    height: (widget.widgets[sliderSelection].skeletonHeight ?? Random().nextInt(100) + 200).toDouble(),
+                                  ),
                             ),
-                          )
-                      : searchbarValue.isEmpty && widget.widgets[sliderSelection].ownDataList != null
+                          ),
+                        )
+                  : searchbarValue.isEmpty && widget.widgets[sliderSelection].ownDataList != null
                       ? (widget.widgets[sliderSelection].ownDataList?.isNotEmpty ?? false)
                           ? widget.widgets[sliderSelection].ownDataList!.map((item) => insertDataIntoWidget(widget.widgets[sliderSelection].object, item)).toList()
                           : [buildEmptyState(context)]
                       : data[sliderSelection].isNotEmpty
-                      ? buildList(context)
-                      : [buildEmptyState(context)],
+                          ? buildList(context)
+                          : [buildEmptyState(context)],
             ),
           ),
         ],
@@ -584,7 +571,8 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
 
   List<Widget> buildList(BuildContext context) {
     if (widget.widgets[sliderSelection].dateColumnName != null) {
-      return DateGrouper.groupByDate(data[sliderSelection]).entries
+      return DateGrouper.groupByDate(data[sliderSelection])
+          .entries
           .expand(
             (entry) => [
               Titel(text: entry.key, count: entry.value.length), // "Heute", "Gestern", etc.
@@ -605,16 +593,15 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
 
   Widget buildEmptyState(BuildContext context) {
     return Column(
-      children:
-          searchbarValue.isNotEmpty
-              ? [
-                EmptyState(
-                  illustration: const Text('🔍', textAlign: TextAlign.center, style: TextStyle(fontSize: 50)),
-                  title: "Keine Suchergebnisse für '$searchbarValue'",
-                  text: "Überprüfe die Schreibweise",
-                ),
-              ]
-              : widget.widgets[sliderSelection].emptyState ?? [EmptyState(illustration: Text('🕳️', textAlign: TextAlign.center, style: TextStyle(fontSize: 50)), title: "Keine Ergebnisse vorhanden")],
+      children: searchbarValue.isNotEmpty
+          ? [
+              EmptyState(
+                illustration: const Text('🔍', textAlign: TextAlign.center, style: TextStyle(fontSize: 50)),
+                title: "Keine Suchergebnisse für '$searchbarValue'",
+                text: "Überprüfe die Schreibweise",
+              ),
+            ]
+          : widget.widgets[sliderSelection].emptyState ?? [EmptyState(illustration: Text('🕳️', textAlign: TextAlign.center, style: TextStyle(fontSize: 50)), title: "Keine Ergebnisse vorhanden")],
     );
   }
 }

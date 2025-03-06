@@ -9,13 +9,7 @@ class Skeleton extends StatefulWidget {
   final double borderRadius;
   final bool isOnBackground;
 
-  const Skeleton({
-    this.height = double.infinity,
-    this.width = double.infinity,
-    this.borderRadius = 15,
-    this.isOnBackground = true,
-    super.key,
-  });
+  const Skeleton({this.height = double.infinity, this.width = double.infinity, this.borderRadius = 12, this.isOnBackground = true, super.key});
 
   @override
   SkeletonState createState() => SkeletonState();
@@ -30,15 +24,9 @@ class SkeletonState extends State<Skeleton> with SingleTickerProviderStateMixin 
   void initState() {
     super.initState();
 
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat(reverse: true);
+    controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))..repeat(reverse: true);
 
-    animation = Tween(begin: 0.5, end: 1.0).animate(CurvedAnimation(
-      parent: controller,
-      curve: Curves.easeInOut,
-    ));
+    animation = Tween(begin: 0.5, end: 1.0).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }
 
   @override

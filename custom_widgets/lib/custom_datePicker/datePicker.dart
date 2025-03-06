@@ -95,7 +95,7 @@ class DatePickerState extends State<DatePicker> {
       child: Container(
         padding: const EdgeInsets.all(15),
         width: double.infinity,
-        decoration: BoxDecoration(color: constants.primary, border: Border.all(color: constants.secondary, width: 1), borderRadius: BorderRadius.circular(10)),
+        decoration: BoxDecoration(color: constants.primary, border: Border.all(color: constants.secondary, width: 1), borderRadius: BorderRadius.circular(12)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -110,6 +110,7 @@ class DatePickerState extends State<DatePicker> {
                     softWrap: true,
                     maxLines: null,
                     style: TextStyle(
+                      height: 1,
                       fontFamily: constants.fontFamily,
                       fontSize: constants.regularFontSize,
                       color: constants.subFontColor,
@@ -122,7 +123,14 @@ class DatePickerState extends State<DatePicker> {
                     selectedDate == null ? widget.preSelected : DateFormat('dd.MM.yyyy').format(selectedDate!),
                     softWrap: true,
                     maxLines: null,
-                    style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, color: constants.fontColor, fontWeight: constants.bold, overflow: TextOverflow.ellipsis),
+                    style: TextStyle(
+                      height: 1,
+                      fontFamily: constants.fontFamily,
+                      fontSize: constants.semibigFontSize,
+                      color: constants.fontColor,
+                      fontWeight: constants.bold,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),

@@ -8,7 +8,7 @@ class Button extends StatefulWidget with Vibrate {
   final String text;
   final bool loader;
   final bool minWidth;
-  final BorderRadius? borderRadius;
+  final BorderRadius borderRadius;
   final Border? border;
   final Color? fontColor;
   final bool deactivated;
@@ -26,7 +26,7 @@ class Button extends StatefulWidget with Vibrate {
     this.loader = false,
     this.deactivated = false,
     this.minWidth = false,
-    this.borderRadius,
+    this.borderRadius = const BorderRadius.all(Radius.circular(10)),
     this.border,
     this.fontColor,
     this.click,
@@ -110,8 +110,8 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
             opacity: widget.deactivated ? 0.2 : opacityAnimation.value,
             child: Container(
               width: widget.minWidth ? null : double.infinity,
-              padding: widget.padding ?? const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: widget.color ?? color, borderRadius: widget.borderRadius ?? BorderRadius.circular(10), border: widget.border),
+              padding: widget.padding ?? const EdgeInsets.all(15),
+              decoration: BoxDecoration(color: widget.color ?? color, borderRadius: widget.borderRadius, border: widget.border),
               child: Center(
                 child:
                     !widget.loader
@@ -127,14 +127,26 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
                                 child: Text(
                                   widget.text,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: widget.fontColor ?? constants.fontColor, fontWeight: constants.medium),
+                                  style: TextStyle(
+                                    height: 1,
+                                    fontFamily: constants.fontFamily,
+                                    fontSize: constants.mediumFontSize,
+                                    color: widget.fontColor ?? constants.fontColor,
+                                    fontWeight: constants.medium,
+                                  ),
                                 ),
                               ),
                               if (widget.textIcon != null) ...[
                                 const Gap(5),
                                 Text(
                                   widget.textIcon!,
-                                  style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: widget.fontColor ?? constants.fontColor, fontWeight: constants.medium),
+                                  style: TextStyle(
+                                    height: 1,
+                                    fontFamily: constants.fontFamily,
+                                    fontSize: constants.mediumFontSize,
+                                    color: widget.fontColor ?? constants.fontColor,
+                                    fontWeight: constants.medium,
+                                  ),
                                 ),
                               ],
                               if (widget.icon != null) ...[const Gap(5), widget.icon!],

@@ -9,14 +9,7 @@ class Searchbar extends StatefulWidget {
   final bool isLoading;
   final String? value;
 
-  const Searchbar({
-    required this.placeholder,
-    this.onOpenFocus = false,
-    this.input,
-    this.isLoading = false,
-    this.value,
-    super.key,
-  });
+  const Searchbar({required this.placeholder, this.onOpenFocus = false, this.input, this.isLoading = false, this.value, super.key});
 
   @override
   SearchbarState createState() => SearchbarState();
@@ -110,35 +103,25 @@ class SearchbarState extends State<Searchbar> {
                     textAlign: TextAlign.start,
                     decoration: InputDecoration(
                       isDense: true,
-                      contentPadding: const EdgeInsets.only(left: 35, top: 10, bottom: 12, right: 35),
+                      contentPadding: const EdgeInsets.only(left: 35, top: 14, bottom: 14, right: 35),
                       fillColor: constants.secondary,
                       filled: true,
                       counterText: '',
                       labelText: widget.placeholder,
                       labelStyle: TextStyle(
+                        height: 1,
                         overflow: TextOverflow.ellipsis,
                         fontFamily: constants.fontFamily,
                         fontSize: constants.regularFontSize,
                         color: constants.subFontColor,
                         fontWeight: constants.medium,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide(
-                          color: constants.blue,
-                          width: 1,
-                        ),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide: const BorderSide(
-                          width: 0,
-                          style: BorderStyle.none,
-                        ),
-                      ),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0), borderSide: BorderSide(color: constants.blue, width: 1)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0), borderSide: const BorderSide(width: 0, style: BorderStyle.none)),
                     ),
                     textAlignVertical: TextAlignVertical.center,
                     style: TextStyle(
+                      height: 1,
                       decoration: TextDecoration.none,
                       decorationThickness: 0,
                       overflow: TextOverflow.fade,
@@ -148,50 +131,28 @@ class SearchbarState extends State<Searchbar> {
                       fontWeight: constants.medium,
                     ),
                   ),
-                  Positioned(
-                    left: 10,
-                    top: 10,
-                    bottom: 10,
-                    child: SizedBox(
-                      height: 15,
-                      width: 15,
-                      child: Image.asset('${constants.imgPath}lupe.png'),
-                    ),
-                  ),
+                  Positioned(left: 10, top: 10, bottom: 10, child: SizedBox(height: 15, width: 15, child: Image.asset('${constants.imgPath}lupe.png'))),
                   if (inputText != "")
                     Positioned(
                       right: 10,
                       top: 10,
                       bottom: 10,
-                      child: widget.isLoading
-                          ? CupertinoActivityIndicator(
-                              radius: 10,
-                              color: constants.fontColor,
-                            )
-                          : GestureDetector(
-                              onTap: () {
-                                controller.text = "";
-                                if (widget.input != null) {
-                                  widget.input!("");
-                                }
-                                setState(() {
-                                  inputText = "";
-                                });
-                                FocusScope.of(context).requestFocus(focusNode);
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  color: constants.third,
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                child: SizedBox(
-                                  height: 10,
-                                  width: 10,
-                                  child: Image.asset('${constants.imgPath}cross.png'),
-                                ),
+                      child:
+                          widget.isLoading
+                              ? CupertinoActivityIndicator(radius: 10, color: constants.fontColor)
+                              : GestureDetector(
+                                onTap: () {
+                                  controller.text = "";
+                                  if (widget.input != null) {
+                                    widget.input!("");
+                                  }
+                                  setState(() {
+                                    inputText = "";
+                                  });
+                                  FocusScope.of(context).requestFocus(focusNode);
+                                },
+                                child: Icon(CupertinoIcons.xmark_circle_fill, color: constants.fontColor, size: 20),
                               ),
-                            ),
                     ),
                 ],
               ),
@@ -205,12 +166,7 @@ class SearchbarState extends State<Searchbar> {
                 color: const Color.fromARGB(0, 0, 0, 0),
                 child: Text(
                   "Abbrechen",
-                  style: TextStyle(
-                    fontFamily: constants.fontFamily,
-                    fontSize: constants.mediumFontSize,
-                    color: constants.subFontColor,
-                    fontWeight: constants.medium,
-                  ),
+                  style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: constants.subFontColor, fontWeight: constants.medium),
                 ),
               ),
             ),

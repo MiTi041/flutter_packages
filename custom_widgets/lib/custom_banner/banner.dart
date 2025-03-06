@@ -79,14 +79,14 @@ class CustomBannerState extends State<CustomBanner> {
                           widget.titel,
                           softWrap: true,
                           maxLines: null,
-                          style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, color: constants.fontColor, fontWeight: constants.bold),
+                          style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, color: constants.fontColor, fontWeight: constants.bold),
                         ),
                         const Gap(5),
                         Text(
                           widget.text,
                           softWrap: true,
                           maxLines: null,
-                          style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.subFontColor, fontWeight: constants.medium),
+                          style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.subFontColor, fontWeight: constants.medium),
                         ),
                         if (widget.buttonText != null || widget.closeButtonText != null)
                           Column(
@@ -104,7 +104,7 @@ class CustomBannerState extends State<CustomBanner> {
                                         decoration: BoxDecoration(color: constants.blue, borderRadius: BorderRadius.circular(50)),
                                         child: Text(
                                           widget.buttonText!,
-                                          style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.fontColor, fontWeight: constants.medium),
+                                          style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.fontColor, fontWeight: constants.medium),
                                         ),
                                       ),
                                     ),
@@ -118,7 +118,13 @@ class CustomBannerState extends State<CustomBanner> {
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           child: Text(
                                             widget.closeButtonText!,
-                                            style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.fontColor, fontWeight: constants.medium),
+                                            style: TextStyle(
+                                              height: 1,
+                                              fontFamily: constants.fontFamily,
+                                              fontSize: constants.regularFontSize,
+                                              color: constants.fontColor,
+                                              fontWeight: constants.medium,
+                                            ),
                                           ),
                                         ),
                                       ),

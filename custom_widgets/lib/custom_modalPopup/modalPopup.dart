@@ -13,8 +13,8 @@ class CustomModalPopup {
       useSafeArea: true,
       isScrollControlled: true,
       context: context,
-      backgroundColor: constants.background,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
+      backgroundColor: constants.primary,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10))),
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -45,7 +45,7 @@ class CustomModalPopup {
                   ),
                   ClipRRect(
                     clipBehavior: Clip.hardEdge,
-                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
                     child: Stack(
                       children: [
                         Frame(isModalPopup: true, neverScrollPhysics: neverScrollPhysics, shrinkWrap: true, appbar: Appbar(isModalPopup: true, titel: titel, actions: const []), widget: widget),

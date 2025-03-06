@@ -57,7 +57,14 @@ class ItemState extends State<Item> {
       children: [
         Container(
           width: double.infinity,
-          decoration: BoxDecoration(color: constants.primary, borderRadius: BorderRadius.circular(10)),
+          decoration: BoxDecoration(
+            color: constants.primary,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: constants.secondary,
+              width: 0.5,
+            ),
+          ),
           padding: const EdgeInsets.all(10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -67,11 +74,21 @@ class ItemState extends State<Item> {
                 Text(
                   widget.titel,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, color: constants.fontColor, fontWeight: constants.bold),
+                  style: TextStyle(
+                    height: 1,
+                    fontFamily: constants.fontFamily,
+                    fontSize: constants.semibigFontSize,
+                    color: constants.fontColor,
+                    fontWeight: constants.bold,
+                  ),
                 ),
                 const Gap(10),
               ],
-              Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: widget.content),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widget.content,
+              ),
             ],
           ),
         ),

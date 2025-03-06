@@ -103,7 +103,9 @@ class MessageWidgetState extends State<MessageWidget> {
                             decoration: BoxDecoration(color: constants.fontColor, borderRadius: BorderRadius.circular(50)),
                             child: Center(
                               child:
-                                  widget.textIcon == null ? SizedBox(height: 24, width: 24, child: widget.icon) : Text(" ${widget.textIcon!}", style: TextStyle(fontSize: constants.semibigFontSize)),
+                                  widget.textIcon == null
+                                      ? SizedBox(height: 24, width: 24, child: widget.icon)
+                                      : Text(" ${widget.textIcon!}", style: TextStyle(height: 1, fontSize: constants.semibigFontSize)),
                             ),
                           ),
                       const Gap(15),
@@ -111,7 +113,7 @@ class MessageWidgetState extends State<MessageWidget> {
                         Text(
                           widget.titel!,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, color: constants.fontColor, fontWeight: constants.bold),
+                          style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, color: constants.fontColor, fontWeight: constants.bold),
                         ),
                         const Gap(5),
                       ],
@@ -119,7 +121,7 @@ class MessageWidgetState extends State<MessageWidget> {
                         Text(
                           widget.text!,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.subFontColor, fontWeight: constants.medium),
+                          style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.subFontColor, fontWeight: constants.medium),
                         ),
                       if (widget.items != null && widget.items!.isNotEmpty) Column(children: [const Gap(15), for (Widget item in widget.items!) item]),
                       const Gap(15),
@@ -150,7 +152,7 @@ class MessageWidgetState extends State<MessageWidget> {
                                       children: [
                                         Text(
                                           widget.closeButton!,
-                                          style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.fontColor, fontWeight: constants.medium),
+                                          style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.fontColor, fontWeight: constants.medium),
                                         ),
                                       ],
                                     ),

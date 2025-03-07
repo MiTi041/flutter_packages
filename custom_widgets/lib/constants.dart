@@ -121,9 +121,4 @@ class Constants {
   final String imgPath;
 
   final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
-
-  static Size get screenSize {
-    final view = WidgetsBinding.instance.platformDispatcher.views.first;
-    return view.physicalSize / view.devicePixelRatio;
-  }
 }

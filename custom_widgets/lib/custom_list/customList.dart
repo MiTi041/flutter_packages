@@ -3,7 +3,7 @@ import 'package:custom_widgets/custom_list/refresh_provider.dart';
 import 'package:custom_utils/custom_supabaseHelper.dart';
 import 'package:custom_widgets/custom_list/dateGrouper.dart';
 import 'package:custom_widgets/custom_siteSelection/siteSelectionItem.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_fadein/flutter_fadein.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
@@ -98,6 +98,8 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
   int offset = 0;
   bool noMoreData = false;
   int alreadyLoadedResults = 0;
+  late List<bool> isDataInitialized;
+  bool loadMoreLoader = false;
 
   // Instances
   late final RefreshProvider refreshProvider;
@@ -119,7 +121,8 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
 
     siteSelectionItemsLength = siteSelectionItems.isNotEmpty ? siteSelectionItems.length : 1;
 
-    data = List.generate(siteSelectionItemsLength, (_) => [null]);
+    data = List.generate(siteSelectionItemsLength, (_) => []);
+    isDataInitialized = List.generate(siteSelectionItemsLength, (_) => false);
 
     refreshProvider = Provider.of<RefreshProvider>(context, listen: false);
     if (widget.useRefreshProvider) refreshProvider.addListener(refreshProviderListener);
@@ -162,12 +165,10 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
     }
   }
 
-  Future<void> load({bool withoutLoading = false, bool isSearch = false}) async {
-    if (!withoutLoading) {
-      setState(() {
-        isLoading = true;
-      });
-    }
+  Future<void> load({bool withoutLoading = false, bool isSearch = false, bool activateLoadMoreLoader = false}) async {
+    if (!withoutLoading) isLoading = true;
+    if (activateLoadMoreLoader) loadMoreLoader = true;
+    setState(() {});
 
     if (sliderSelection < widget.widgets.length && !noMoreData) {
       CustomListWidget widgetConfig = widget.widgets[preSelectedIndex ?? sliderSelection];
@@ -208,7 +209,12 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
       }
 
       // Abfrage ausführen mit optionaler Sortierung und Paginierung
-      results = await query.order(widgetConfig.dateColumnName != null ? widgetConfig.dateColumnName! : queryInfo.orderByColumn, ascending: queryInfo.ascending).range(offset, offset + limit - 1);
+      results = await query
+          .order(
+            widgetConfig.dateColumnName != null ? widgetConfig.dateColumnName! : queryInfo.orderByColumn,
+            ascending: queryInfo.ascending,
+          )
+          .range(offset, offset + limit - 1);
 
       // Wenn es eine Datumsspalte gibt, benenne sie um
       if (widgetConfig.dateColumnName != null) {
@@ -220,7 +226,9 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
       // Prüfen, ob noch Daten vorhanden sind
       if (results.isEmpty) {
         noMoreData = true;
-        if (isSearch) data[sliderSelection].clear();
+        if (isSearch && isDataInitialized[sliderSelection]) {
+          data[sliderSelection].clear();
+        }
       } else {
         alreadyLoadedResults += results.length;
 
@@ -241,12 +249,14 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
       }
 
       isLoading = false;
-      setState(() {});
+      loadMoreLoader = false;
     } else {
-      setState(() {
-        isLoading = false;
-      });
+      isLoading = false;
+      loadMoreLoader = false;
     }
+
+    isDataInitialized[sliderSelection] = true;
+    setState(() {});
   }
 
   List<Map<String, dynamic>?> deleteDuplicates(List<Map<String, dynamic>?> results) {
@@ -373,7 +383,7 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
 
     calculateContentConstraints();
 
-    load(withoutLoading: true);
+    load(withoutLoading: true, isSearch: searchbarValue.isNotEmpty);
   }
 
   Future<void> removeItemWithId(int id) async {
@@ -539,29 +549,40 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
               runAlignment: WrapAlignment.start,
               spacing: spacing,
               runSpacing: spacing,
-              children: isLoading
-                  ? widget.widgets[sliderSelection].showNotTheSkeleton
-                      ? []
-                      : List.generate(
-                          n * 5,
-                          (_) => SizedBox(
-                            width: itemWidth,
-                            child: FadeIn(
-                              child: widget.widgets[sliderSelection].customSkeleton ??
-                                  Skeleton(
-                                    borderRadius: widget.widgets[sliderSelection].skeletonBorderRadius,
-                                    height: (widget.widgets[sliderSelection].skeletonHeight ?? Random().nextInt(100) + 200).toDouble(),
-                                  ),
-                            ),
-                          ),
-                        )
-                  : searchbarValue.isEmpty && widget.widgets[sliderSelection].ownDataList != null
-                      ? (widget.widgets[sliderSelection].ownDataList?.isNotEmpty ?? false)
-                          ? widget.widgets[sliderSelection].ownDataList!.map((item) => insertDataIntoWidget(widget.widgets[sliderSelection].object, item)).toList()
-                          : [buildEmptyState(context)]
-                      : data[sliderSelection].isNotEmpty
-                          ? buildList(context)
-                          : [buildEmptyState(context)],
+              children: [
+                if (isLoading || !isDataInitialized[sliderSelection])
+                  if (!widget.widgets[sliderSelection].showNotTheSkeleton)
+                    ...List.generate(
+                      n * 5,
+                      (_) => SizedBox(
+                        width: itemWidth,
+                        child: FadeIn(
+                          child: widget.widgets[sliderSelection].customSkeleton ??
+                              Skeleton(
+                                borderRadius: widget.widgets[sliderSelection].skeletonBorderRadius,
+                                height: (widget.widgets[sliderSelection].skeletonHeight ?? Random().nextInt(100) + 200).toDouble(),
+                              ),
+                        ),
+                      ),
+                    ),
+                if (!isLoading && isDataInitialized[sliderSelection])
+                  if (searchbarValue.isEmpty && widget.widgets[sliderSelection].ownDataList != null)
+                    if (widget.widgets[sliderSelection].ownDataList!.isNotEmpty)
+                      ...widget.widgets[sliderSelection].ownDataList!.map((item) => insertDataIntoWidget(widget.widgets[sliderSelection].object, item))
+                    else
+                      buildEmptyState(context, isDataInitialized[sliderSelection])
+                  else if (data[sliderSelection].isNotEmpty)
+                    ...buildList(context)
+                  else
+                    buildEmptyState(context, isDataInitialized[sliderSelection]),
+                if (loadMoreLoader)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: CupertinoActivityIndicator(),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
@@ -575,23 +596,26 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
           .entries
           .expand(
             (entry) => [
-              Titel(text: entry.key, count: entry.value.length), // "Heute", "Gestern", etc.
+              Container(
+                margin: const EdgeInsets.only(left: 10),
+                child: Titel(text: entry.key, count: entry.value.length),
+              ), // "Heute", "Gestern", etc.
               ...entry.value.map((item) => insertDataIntoWidget(widget.widgets[sliderSelection].object, item)),
             ],
           )
           .toList();
     } else {
-      if (data[sliderSelection].isNotEmpty && data[sliderSelection][0] != null) {
+      if (data[sliderSelection].isNotEmpty) {
         return data[sliderSelection].map((item) {
           return insertDataIntoWidget(widget.widgets[sliderSelection].object, item);
         }).toList();
       } else {
-        return [buildEmptyState(context)];
+        return [buildEmptyState(context, isDataInitialized[sliderSelection])];
       }
     }
   }
 
-  Widget buildEmptyState(BuildContext context) {
+  Widget buildEmptyState(BuildContext context, bool isDataInitialized) {
     return Column(
       children: searchbarValue.isNotEmpty
           ? [

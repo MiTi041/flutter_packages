@@ -13,10 +13,9 @@ class Button extends StatefulWidget with Vibrate {
   final Color? fontColor;
   final bool deactivated;
   final String? textIcon;
-  final Icon? icon;
+  final IconData? icon;
   final EdgeInsets? padding;
   final bool spaceBetweenTextAndIcon;
-  final Constants? constants;
 
   final VoidCallback? click;
 
@@ -26,7 +25,7 @@ class Button extends StatefulWidget with Vibrate {
     this.loader = false,
     this.deactivated = false,
     this.minWidth = false,
-    this.borderRadius = const BorderRadius.all(Radius.circular(10)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
     this.border,
     this.fontColor,
     this.click,
@@ -34,7 +33,6 @@ class Button extends StatefulWidget with Vibrate {
     this.textIcon,
     this.padding,
     this.spaceBetweenTextAndIcon = false,
-    this.constants,
     super.key,
   });
 
@@ -46,7 +44,6 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
   // Animation Controller
   late AnimationController animationController;
   late Animation<double> opacityAnimation;
-  late Constants constants;
 
   // Variables
   late Color color;
@@ -54,12 +51,6 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
   @override
   void initState() {
     super.initState();
-
-    if (widget.constants == null) {
-      constants = Constants();
-    } else {
-      constants = widget.constants!;
-    }
 
     // Initialize animation controller
     animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
@@ -113,47 +104,49 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
               padding: widget.padding ?? const EdgeInsets.all(15),
               decoration: BoxDecoration(color: widget.color ?? color, borderRadius: widget.borderRadius, border: widget.border),
               child: Center(
-                child:
-                    !widget.loader
-                        ? SizedBox(
-                          width: double.infinity,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Expanded(
-                                flex: widget.spaceBetweenTextAndIcon ? 1 : 0,
-                                child: Text(
-                                  widget.text,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    height: 1,
-                                    fontFamily: constants.fontFamily,
-                                    fontSize: constants.mediumFontSize,
-                                    color: widget.fontColor ?? constants.fontColor,
-                                    fontWeight: constants.medium,
-                                  ),
+                child: !widget.loader
+                    ? SizedBox(
+                        width: double.infinity,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Expanded(
+                              flex: widget.spaceBetweenTextAndIcon ? 1 : 0,
+                              child: Text(
+                                widget.text,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  height: 1,
+                                  fontFamily: constants.fontFamily,
+                                  fontSize: constants.mediumFontSize,
+                                  color: widget.fontColor ?? constants.fontColor,
+                                  fontWeight: constants.medium,
                                 ),
                               ),
-                              if (widget.textIcon != null) ...[
-                                const Gap(5),
-                                Text(
-                                  widget.textIcon!,
-                                  style: TextStyle(
-                                    height: 1,
-                                    fontFamily: constants.fontFamily,
-                                    fontSize: constants.mediumFontSize,
-                                    color: widget.fontColor ?? constants.fontColor,
-                                    fontWeight: constants.medium,
-                                  ),
+                            ),
+                            if (widget.textIcon != null) ...[
+                              const Gap(5),
+                              Text(
+                                widget.textIcon!,
+                                style: TextStyle(
+                                  height: 1,
+                                  fontFamily: constants.fontFamily,
+                                  fontSize: constants.mediumFontSize,
+                                  color: widget.fontColor ?? constants.fontColor,
+                                  fontWeight: constants.medium,
                                 ),
-                              ],
-                              if (widget.icon != null) ...[const Gap(5), widget.icon!],
+                              ),
                             ],
-                          ),
-                        )
-                        : CupertinoActivityIndicator(color: widget.fontColor ?? constants.fontColor, radius: 8.0),
+                            if (widget.icon != null) ...[
+                              const Gap(5),
+                              Icon(widget.icon, size: 17, color: widget.fontColor ?? constants.fontColor),
+                            ],
+                          ],
+                        ),
+                      )
+                    : CupertinoActivityIndicator(color: widget.fontColor ?? constants.fontColor, radius: 8.0),
               ),
             ),
           );

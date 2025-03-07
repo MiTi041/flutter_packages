@@ -47,7 +47,7 @@ class CustomSnackbarState extends State<CustomSnackbar> {
     });
 
     // Nach 2 Sekunden die Snackbar wieder nach unten schieben und Callback auslösen
-    timerSlideUp = Timer(const Duration(seconds: 2), () {
+    timerSlideUp = Timer(const Duration(seconds: 3), () {
       setState(() {
         isSliding = false; // Starten der Aufwärtsbewegung
       });

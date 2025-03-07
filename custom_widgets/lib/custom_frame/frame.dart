@@ -1,3 +1,4 @@
+import 'package:custom_widgets/custom_appbar/appbar.dart';
 import 'package:custom_widgets/custom_frame/frame_provider.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:custom_widgets/custom_list/customList.dart';
@@ -10,6 +11,7 @@ import 'package:custom_utils/custom_vibrate.dart';
 
 class Frame extends StatefulWidget {
   final Widget appbar;
+  final GlobalKey<AppbarState>? appbarKey;
   final Widget? bottombar;
   final Widget widget;
   final bool isPageView;
@@ -24,6 +26,7 @@ class Frame extends StatefulWidget {
   final bool isModalPopup;
 
   const Frame({
+    this.appbarKey,
     required this.appbar,
     this.bottombar,
     required this.widget,
@@ -60,15 +63,31 @@ class FrameState extends State<Frame> with Vibrate {
 
     scrollController = widget.scrollController ?? ScrollController();
 
-    if (widget.customListKey != null) {
-      scrollController.addListener(() {
+    scrollController.addListener(() {
+      // um die appbar zu verändern wenn etwas unter ihr ist
+      double offset = scrollController.offset;
+
+      if (offset > 0 && Provider.of<FrameProvider>(context, listen: false).isAppbarBlurred == false) {
+        Provider.of<FrameProvider>(context, listen: false).refreshIsAppbarBlurred(true);
+      } else if (offset <= 0 && Provider.of<FrameProvider>(context, listen: false).isAppbarBlurred == true) {
+        Provider.of<FrameProvider>(context, listen: false).refreshIsAppbarBlurred(false);
+      }
+
+      //if (offset > 1 && widget.appbarKey?.currentState != null && widget.appbarKey?.currentState?.isBlurred == false) {
+      //  widget.appbarKey?.currentState?.setBlurred(true);
+      //} else if (offset <= 1 && widget.appbarKey?.currentState != null && widget.appbarKey?.currentState?.isBlurred == true) {
+      //  widget.appbarKey?.currentState?.setBlurred(false);
+      //}
+
+      // um zu sagen ob die liste am ende ist
+      if (widget.customListKey != null) {
         if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 300) {
           // Fast am Ende der Liste
           if (!isNearEnd) {
             setState(() {
               isNearEnd = true;
 
-              widget.customListKey!.currentState?.load(withoutLoading: true);
+              widget.customListKey!.currentState?.load(withoutLoading: true, activateLoadMoreLoader: true);
             });
           }
         } else {
@@ -76,8 +95,8 @@ class FrameState extends State<Frame> with Vibrate {
             isNearEnd = false;
           });
         }
-      });
-    }
+      }
+    });
 
     load();
   }
@@ -109,53 +128,54 @@ class FrameState extends State<Frame> with Vibrate {
           widget.isPageView
               ? Container(clipBehavior: Clip.none, margin: const EdgeInsets.only(left: 15, right: 15), child: Column(children: [widget.widget]))
               : Container(
-                clipBehavior: Clip.none,
-                margin: EdgeInsets.only(left: 15, right: 15, bottom: widget.bottombar != null ? 0 : 15),
-                child: CustomScrollView(
-                  reverse: widget.reverse,
-                  shrinkWrap: widget.shrinkWrap,
                   clipBehavior: Clip.none,
-                  controller: scrollController,
-                  physics: widget.neverScrollPhysics ? const NeverScrollableScrollPhysics() : physics,
-                  slivers: <Widget>[
-                    if (widget.customListKey != null || widget.onRefresh != null)
-                      CupertinoSliverRefreshControl(
-                        onRefresh: () async {
-                          if (widget.customListKey != null) widget.customListKey!.currentState?.refresh();
-                          if (widget.onRefresh != null) widget.onRefresh!();
-                          vibrateHeavy();
+                  margin: EdgeInsets.only(left: 15, right: 15, bottom: widget.bottombar != null ? 0 : 15),
+                  child: CustomScrollView(
+                    scrollBehavior: CupertinoScrollBehavior(),
+                    reverse: widget.reverse,
+                    shrinkWrap: widget.shrinkWrap,
+                    clipBehavior: Clip.none,
+                    controller: scrollController,
+                    physics: widget.neverScrollPhysics ? const NeverScrollableScrollPhysics() : physics,
+                    slivers: <Widget>[
+                      if (widget.customListKey != null || widget.onRefresh != null)
+                        CupertinoSliverRefreshControl(
+                          onRefresh: () async {
+                            if (widget.customListKey != null) widget.customListKey!.currentState?.refresh();
+                            if (widget.onRefresh != null) widget.onRefresh!();
+                            vibrateHeavy();
 
-                          await Future.delayed(const Duration(seconds: 1));
-                        },
-                        builder: (context, refreshState, pulledExtent, refreshTriggerPullDistance, refreshIndicatorExtent) {
-                          return Padding(
-                            padding: EdgeInsets.only(top: frameProvider.appbarHeight),
-                            child: CupertinoSliverRefreshControl.buildRefreshIndicator(context, refreshState, pulledExtent, refreshTriggerPullDistance, refreshIndicatorExtent),
-                          );
-                        },
-                      ),
-                    SliverToBoxAdapter(
-                      child: SafeArea(
-                        top: false,
-                        maintainBottomViewPadding: true,
-                        bottom: widget.bottombar == null ? true : false,
-                        left: false,
-                        right: false,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            widget.isModalPopup ? Gap(frameProvider.modalPopupAppbarHeight) : Gap(frameProvider.appbarHeight),
-                            const Gap(15),
-                            widget.widget,
-                            if (!widget.isModalPopup) Gap(MediaQuery.of(context).viewInsets.bottom),
-                            if (widget.bottombar != null && widget.showBottomGap) ...[if (widget.bottombar is Navbar) Gap(frameProvider.bottombarHeight + 15)],
-                          ],
+                            await Future.delayed(const Duration(seconds: 1));
+                          },
+                          builder: (context, refreshState, pulledExtent, refreshTriggerPullDistance, refreshIndicatorExtent) {
+                            return Padding(
+                              padding: EdgeInsets.only(top: frameProvider.appbarHeight),
+                              child: CupertinoSliverRefreshControl.buildRefreshIndicator(context, refreshState, pulledExtent, refreshTriggerPullDistance, refreshIndicatorExtent),
+                            );
+                          },
+                        ),
+                      SliverToBoxAdapter(
+                        child: SafeArea(
+                          top: false,
+                          maintainBottomViewPadding: true,
+                          bottom: widget.bottombar == null ? true : false,
+                          left: false,
+                          right: false,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              widget.isModalPopup ? Gap(frameProvider.modalPopupAppbarHeight) : Gap(frameProvider.appbarHeight),
+                              const Gap(15),
+                              widget.widget,
+                              if (!widget.isModalPopup) Gap(MediaQuery.of(context).viewInsets.bottom),
+                              if (widget.bottombar != null && widget.showBottomGap) ...[if (widget.bottombar is Navbar) Gap(frameProvider.bottombarHeight + 15)],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
           Positioned(top: 0, left: 0, right: 0, child: widget.appbar),
           if (widget.bottombar != null)
             Positioned(

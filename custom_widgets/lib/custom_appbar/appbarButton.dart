@@ -4,14 +4,22 @@ import 'package:custom_widgets/constants.dart';
 
 class AppbarButton extends StatelessWidget {
   final String? text;
-  final String? icon;
+  final IconData? icon;
   final Color? color;
   final Color? fontColor;
   final Color? borderColor;
 
   final VoidCallback? click;
 
-  const AppbarButton({this.text, this.icon, this.color, this.fontColor, this.borderColor, this.click, super.key});
+  const AppbarButton({
+    this.text,
+    this.icon,
+    this.color,
+    this.fontColor,
+    this.borderColor,
+    this.click,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +38,7 @@ class AppbarButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null) Row(children: [SizedBox(height: 15, width: 15, child: Image.asset('${constants.imgPath}${icon!}'))]),
+              if (icon != null) Icon(icon, size: 17, color: fontColor ?? constants.fontColor),
               if (icon != null && text != null) const Gap(5),
               if (text != null)
                 Text(text!, style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: fontColor ?? constants.fontColor, fontWeight: constants.bold)),

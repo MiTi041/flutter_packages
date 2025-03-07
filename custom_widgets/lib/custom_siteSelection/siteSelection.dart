@@ -7,13 +7,11 @@ class SiteSelection extends StatefulWidget {
   final List<SiteSelectionItem> items;
   final Function(int)? select;
   final int? preSelectedIndex;
-  final bool differentColors;
 
   const SiteSelection({
     required this.items,
     this.select,
     this.preSelectedIndex,
-    this.differentColors = true,
     super.key,
   }) : assert(items.length > 0 && items.length < 7);
 
@@ -41,7 +39,9 @@ class SiteSelectionState extends State<SiteSelection> {
 
     sliderSelection = widget.preSelectedIndex ?? 0;
 
-    load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      load();
+    });
   }
 
   @override
@@ -49,9 +49,7 @@ class SiteSelectionState extends State<SiteSelection> {
     super.dispose();
   }
 
-  Future<void> load() async {
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
-  }
+  Future<void> load() async {}
 
   // Functions
   void select(index) {
@@ -89,7 +87,7 @@ class SiteSelectionState extends State<SiteSelection> {
               width: sliderSelection == index ? calculateWidth(widget.items.length) : 47,
               margin: EdgeInsets.only(right: entry.key == widget.items.length - 1 ? 0 : 5),
               padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
-              decoration: BoxDecoration(color: sliderSelection == index ? getColorForIndex(index, constants) : constants.secondary, borderRadius: BorderRadius.circular(15)),
+              decoration: BoxDecoration(color: sliderSelection == index ? item.color ?? constants.blue : constants.secondary, borderRadius: BorderRadius.circular(15)),
               child: Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -140,11 +138,5 @@ class SiteSelectionState extends State<SiteSelection> {
   double calculateWidth(int length) {
     final Constants constants = Constants();
     return ((constants.size.width - 30) - (length - 1) * 52);
-  }
-
-  Color getColorForIndex(int index, Constants constants) {
-    if (!widget.differentColors) return constants.blue;
-    List<Color> colors = [constants.blue, constants.green, constants.purple, constants.pink, constants.orange, constants.red];
-    return colors[index % colors.length]; // Farben rotieren
   }
 }

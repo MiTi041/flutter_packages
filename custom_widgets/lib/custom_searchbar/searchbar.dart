@@ -137,22 +137,21 @@ class SearchbarState extends State<Searchbar> {
                       right: 10,
                       top: 10,
                       bottom: 10,
-                      child:
-                          widget.isLoading
-                              ? CupertinoActivityIndicator(radius: 10, color: constants.fontColor)
-                              : GestureDetector(
-                                onTap: () {
-                                  controller.text = "";
-                                  if (widget.input != null) {
-                                    widget.input!("");
-                                  }
-                                  setState(() {
-                                    inputText = "";
-                                  });
-                                  FocusScope.of(context).requestFocus(focusNode);
-                                },
-                                child: Icon(CupertinoIcons.xmark_circle_fill, color: constants.fontColor, size: 20),
-                              ),
+                      child: widget.isLoading
+                          ? CupertinoActivityIndicator(radius: 10, color: constants.fontColor)
+                          : GestureDetector(
+                              onTap: () {
+                                controller.text = "";
+                                if (widget.input != null) {
+                                  widget.input!("");
+                                }
+                                setState(() {
+                                  inputText = "";
+                                });
+                                FocusScope.of(context).requestFocus(focusNode);
+                              },
+                              child: Icon(CupertinoIcons.xmark_circle_fill, color: constants.subFontColor, size: 20),
+                            ),
                     ),
                 ],
               ),

@@ -48,6 +48,7 @@ class AppbarState extends State<Appbar> with Navigate {
     frameProvider = Provider.of<FrameProvider>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      frameProvider.refreshIsAppbarBlurred(false);
       getHeight();
       load();
     });
@@ -62,9 +63,9 @@ class AppbarState extends State<Appbar> with Navigate {
 
   //funktionen
   void getHeight() {
-    final RenderBox inputBarRenderBox = appbarKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox appBarRenderBox = appbarKey.currentContext!.findRenderObject() as RenderBox;
     setState(() {
-      appBarHeight = inputBarRenderBox.size.height;
+      appBarHeight = appBarRenderBox.size.height;
     });
     widget.isModalPopup ? frameProvider.refreshModalPopupAppbarHeights(appBarHeight) : frameProvider.refreshAppbarHeights(appBarHeight);
   }
@@ -111,7 +112,13 @@ class AppbarState extends State<Appbar> with Navigate {
           Container(
             key: appbarKey,
             margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top + (widget.isModalPopup ? 0 : 20)),
-            padding: EdgeInsets.fromLTRB(15, Platform.isIOS && !widget.isModalPopup ? 5 : 15, 15, 10),
+            padding: EdgeInsets.fromLTRB(
+                15,
+                widget.isModalPopup
+                    ? 10 // Wenn iOS und ModalPopup, dann 10, sonst 5
+                    : (Platform.isIOS ? 5 : 0), // Wenn Android und ModalPopup, dann 10, sonst 0
+                15,
+                10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,

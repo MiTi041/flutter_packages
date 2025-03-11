@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:custom_widgets/custom_appbar/appbar.dart';
 import 'package:custom_widgets/custom_frame/frame_provider.dart';
 import 'package:custom_widgets/constants.dart';
@@ -72,12 +73,6 @@ class FrameState extends State<Frame> with Vibrate {
       } else if (offset <= 0 && Provider.of<FrameProvider>(context, listen: false).isAppbarBlurred == true) {
         Provider.of<FrameProvider>(context, listen: false).refreshIsAppbarBlurred(false);
       }
-
-      //if (offset > 1 && widget.appbarKey?.currentState != null && widget.appbarKey?.currentState?.isBlurred == false) {
-      //  widget.appbarKey?.currentState?.setBlurred(true);
-      //} else if (offset <= 1 && widget.appbarKey?.currentState != null && widget.appbarKey?.currentState?.isBlurred == true) {
-      //  widget.appbarKey?.currentState?.setBlurred(false);
-      //}
 
       // um zu sagen ob die liste am ende ist
       if (widget.customListKey != null) {
@@ -167,7 +162,7 @@ class FrameState extends State<Frame> with Vibrate {
                               widget.isModalPopup ? Gap(frameProvider.modalPopupAppbarHeight) : Gap(frameProvider.appbarHeight),
                               const Gap(15),
                               widget.widget,
-                              if (!widget.isModalPopup) Gap(MediaQuery.of(context).viewInsets.bottom),
+                              if (!widget.isModalPopup) Gap(max(0, MediaQuery.of(context).viewInsets.bottom)),
                               if (widget.bottombar != null && widget.showBottomGap) ...[if (widget.bottombar is Navbar) Gap(frameProvider.bottombarHeight + 15)],
                             ],
                           ),

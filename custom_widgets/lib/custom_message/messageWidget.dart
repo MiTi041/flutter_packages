@@ -7,31 +7,37 @@ import 'package:custom_widgets/constants.dart';
 class MessageWidget extends StatefulWidget {
   final String? titel;
   final String? text;
-  final Image? icon;
+  final Image? image;
+  final IconData? icon;
   final String buttonText;
   final String? closeButton;
   final Color? fontColor;
-  final String? textIcon;
   final bool isTooltip;
   final List<Widget>? items;
+  final Color? closeButtonColor;
+  final Color? iconColor;
 
   final VoidCallback? click;
   final VoidCallback? close;
+  final VoidCallback? outerTap;
 
   const MessageWidget({
     required this.titel,
     required this.text,
     this.icon,
+    this.image,
     required this.buttonText,
-    this.textIcon,
     this.isTooltip = false,
     this.click,
     this.close,
+    this.outerTap,
     this.fontColor,
     this.closeButton,
     this.items,
+    this.closeButtonColor,
+    this.iconColor,
     super.key,
-  }) : assert(icon != null || textIcon != null);
+  });
 
   @override
   MessageWidgetState createState() => MessageWidgetState();
@@ -62,12 +68,13 @@ class MessageWidgetState extends State<MessageWidget> {
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
     return Stack(
       children: [
         GestureDetector(
           onTap: () {
-            widget.close!();
+            if (widget.outerTap != null) widget.outerTap!();
           },
           child: Stack(
             children: [
@@ -75,7 +82,7 @@ class MessageWidgetState extends State<MessageWidget> {
                 borderRadius: BorderRadius.circular(20),
                 child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), child: Container(decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.4)))),
               ),
-              Container(height: constants.size.height, width: constants.size.width, decoration: const BoxDecoration(color: Colors.transparent)),
+              Container(height: size.height, width: size.width, decoration: const BoxDecoration(color: Colors.transparent)),
             ],
           ),
         ),
@@ -95,19 +102,29 @@ class MessageWidgetState extends State<MessageWidget> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      const Gap(10),
                       widget.isTooltip
-                          ? Container(height: 80, constraints: const BoxConstraints(maxWidth: double.infinity), child: widget.icon)
-                          : Container(
-                            height: 48,
-                            width: 48,
-                            decoration: BoxDecoration(color: constants.fontColor, borderRadius: BorderRadius.circular(50)),
-                            child: Center(
-                              child:
-                                  widget.textIcon == null
-                                      ? SizedBox(height: 24, width: 24, child: widget.icon)
-                                      : Text(" ${widget.textIcon!}", style: TextStyle(height: 1, fontSize: constants.semibigFontSize)),
-                            ),
-                          ),
+                          ? Container(height: 80, constraints: const BoxConstraints(maxWidth: double.infinity), child: widget.image)
+                          : (widget.icon != null || widget.image != null)
+                              ? Container(
+                                  height: 48,
+                                  width: 48,
+                                  decoration: BoxDecoration(color: constants.fontColor, borderRadius: BorderRadius.circular(50)),
+                                  child: Center(
+                                    child: widget.icon == null
+                                        ? SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: widget.image,
+                                          )
+                                        : Icon(
+                                            widget.icon,
+                                            size: 25,
+                                            color: widget.iconColor ?? constants.background,
+                                          ),
+                                  ),
+                                )
+                              : SizedBox(),
                       const Gap(15),
                       if (widget.titel != null) ...[
                         Text(
@@ -131,36 +148,43 @@ class MessageWidgetState extends State<MessageWidget> {
                         border: Border.all(color: constants.third, width: 1),
                         fontColor: widget.fontColor,
                         click: () {
-                          widget.click!();
+                          if (widget.click != null) widget.click!();
                         },
                       ),
                       widget.closeButton != null
                           ? Column(
-                            children: [
-                              const Gap(15),
-                              GestureDetector(
-                                onTap: () {
-                                  widget.close!();
-                                },
-                                child: Container(
-                                  width: double.infinity,
-                                  decoration: const BoxDecoration(color: Colors.transparent),
-                                  child: Center(
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          widget.closeButton!,
-                                          style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.fontColor, fontWeight: constants.medium),
-                                        ),
-                                      ],
+                              children: [
+                                const Gap(15),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (widget.close != null) widget.close!();
+                                  },
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: const BoxDecoration(color: Colors.transparent),
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            widget.closeButton!,
+                                            style: TextStyle(
+                                              height: 1,
+                                              fontFamily: constants.fontFamily,
+                                              fontSize: constants.mediumFontSize,
+                                              color: widget.closeButtonColor ?? constants.fontColor,
+                                              fontWeight: constants.medium,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          )
+                              ],
+                            )
                           : Container(),
                     ],
                   ),

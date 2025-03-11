@@ -65,11 +65,12 @@ class SiteSelectionState extends State<SiteSelection> {
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
     return Container(
       clipBehavior: Clip.none,
       decoration: const BoxDecoration(),
-      width: constants.size.width,
+      width: size.width,
       height: 40,
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -84,10 +85,13 @@ class SiteSelectionState extends State<SiteSelection> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.fastOutSlowIn,
-              width: sliderSelection == index ? calculateWidth(widget.items.length) : 47,
+              width: sliderSelection == index ? ((size.width - 30) - (widget.items.length - 1) * 52) : 47,
               margin: EdgeInsets.only(right: entry.key == widget.items.length - 1 ? 0 : 5),
               padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
-              decoration: BoxDecoration(color: sliderSelection == index ? item.color ?? constants.blue : constants.secondary, borderRadius: BorderRadius.circular(15)),
+              decoration: BoxDecoration(
+                color: sliderSelection == index ? item.color ?? constants.blue : constants.secondary,
+                borderRadius: BorderRadius.circular(15),
+              ),
               child: Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -133,10 +137,5 @@ class SiteSelectionState extends State<SiteSelection> {
       textDirection: TextDirection.ltr,
     )..layout();
     return textPainter.width + 5;
-  }
-
-  double calculateWidth(int length) {
-    final Constants constants = Constants();
-    return ((constants.size.width - 30) - (length - 1) * 52);
   }
 }

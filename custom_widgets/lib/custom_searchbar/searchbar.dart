@@ -29,13 +29,19 @@ class SearchbarState extends State<Searchbar> {
   void initState() {
     super.initState();
 
-    if (widget.onOpenFocus) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(focusNode);
+    if (widget.value != null) {
+      setState(() {
+        controller.text = widget.value!;
+        inputText = widget.value!;
       });
     }
 
-    load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.onOpenFocus) {
+        FocusScope.of(context).requestFocus(focusNode);
+      }
+      load();
+    });
   }
 
   @override

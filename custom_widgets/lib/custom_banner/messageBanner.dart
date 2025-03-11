@@ -71,7 +71,7 @@ class MessageBannerState extends State<MessageBanner> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(color: _getBannerColor(constants), borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: _getBannerColor(constants), borderRadius: BorderRadius.circular(15)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

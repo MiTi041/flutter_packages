@@ -353,7 +353,8 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
     limit = maxRows;
 
     spacing = widget.widgets[sliderSelection].spacing;
-    itemWidth = (Constants().size.width - 30 - (spacing * (n - 1))) / n;
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+    itemWidth = (size.width - 30 - (spacing * (n - 1))) / n;
   }
 
   void search(String value) async {

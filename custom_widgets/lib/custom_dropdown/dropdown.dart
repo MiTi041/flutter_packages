@@ -7,7 +7,7 @@ class Dropdown extends StatefulWidget {
   final String title;
   final String text;
   final List<List<dynamic>> items;
-  final Future<bool> Function(String)? selection;
+  final Future<bool> Function(dynamic)? selection;
   final dynamic preSelected;
 
   const Dropdown({required this.title, required this.text, required this.items, this.preSelected, this.selection, super.key});
@@ -117,94 +117,93 @@ class DropdownState extends State<Dropdown> {
 
   void showOverlay(BuildContext context) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
     checkHeight();
     getWidgetPosition();
 
     overlayEntry = OverlayEntry(
-      builder:
-          (context) => Stack(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isFocused = false;
-                    removeOverlay();
-                  });
-                },
-                child: Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), child: Container(decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.4)))),
-                    ),
-                    Container(height: MediaQuery.of(context).size.height, width: MediaQuery.of(context).size.width, decoration: const BoxDecoration(color: Colors.transparent)),
-                  ],
+      builder: (context) => Stack(
+        children: [
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                isFocused = false;
+                removeOverlay();
+              });
+            },
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), child: Container(decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.4)))),
                 ),
-              ),
-              Center(
-                child: SafeArea(
-                  child: Material(
-                    color: Colors.transparent,
+                Container(height: MediaQuery.of(context).size.height, width: MediaQuery.of(context).size.width, decoration: const BoxDecoration(color: Colors.transparent)),
+              ],
+            ),
+          ),
+          Center(
+            child: SafeArea(
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  margin: const EdgeInsets.all(15),
+                  width: MediaQuery.of(context).size.width,
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 2),
+                  child: Container(
+                    decoration: BoxDecoration(border: Border.all(color: constants.secondary, width: 1), color: constants.background, borderRadius: BorderRadius.circular(12)),
                     child: Container(
-                      margin: const EdgeInsets.all(15),
-                      width: MediaQuery.of(context).size.width,
-                      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 2),
-                      child: Container(
-                        decoration: BoxDecoration(border: Border.all(color: constants.secondary, width: 1), color: constants.background, borderRadius: BorderRadius.circular(12)),
-                        child: Container(
-                          clipBehavior: Clip.hardEdge,
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
-                          margin: const EdgeInsets.all(5),
-                          child: CustomScrollView(
-                            shrinkWrap: true,
-                            controller: scrollController,
-                            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                            slivers: <Widget>[
-                              SliverToBoxAdapter(
-                                child: Wrap(
-                                  alignment: WrapAlignment.start,
-                                  runAlignment: WrapAlignment.start,
-                                  runSpacing: 3,
-                                  children:
-                                      widget.items
-                                          .map(
-                                            (List<dynamic> item) => GestureDetector(
-                                              onTap: () {
-                                                select(item[0]);
-                                              },
-                                              child: Container(
-                                                padding: const EdgeInsets.all(15),
-                                                width: double.infinity,
-                                                decoration: BoxDecoration(color: selectedValue == item[1] ? constants.third : null, borderRadius: BorderRadius.circular(6)),
-                                                child: Text(
-                                                  item[1],
-                                                  maxLines: 1,
-                                                  style: TextStyle(
-                                                    height: 1,
-                                                    fontFamily: constants.fontFamily,
-                                                    fontSize: constants.regularFontSize,
-                                                    color: constants.fontColor,
-                                                    fontWeight: constants.medium,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                ),
-                              ),
-                            ],
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
+                      margin: const EdgeInsets.all(5),
+                      child: CustomScrollView(
+                        shrinkWrap: true,
+                        controller: scrollController,
+                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                        slivers: <Widget>[
+                          SliverToBoxAdapter(
+                            child: Wrap(
+                              alignment: WrapAlignment.start,
+                              runAlignment: WrapAlignment.start,
+                              runSpacing: 3,
+                              children: widget.items
+                                  .map(
+                                    (List<dynamic> item) => GestureDetector(
+                                      onTap: () {
+                                        select(item[0]);
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(15),
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(color: selectedValue == item[1] ? constants.third : null, borderRadius: BorderRadius.circular(6)),
+                                        child: Text(
+                                          item[1],
+                                          maxLines: 1,
+                                          style: TextStyle(
+                                            height: 1,
+                                            fontFamily: constants.fontFamily,
+                                            fontSize: constants.regularFontSize,
+                                            color: constants.fontColor,
+                                            fontWeight: constants.medium,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ),
+        ],
+      ),
     );
 
     Overlay.of(context).insert(overlayEntry!);
@@ -213,6 +212,7 @@ class DropdownState extends State<Dropdown> {
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
     return Stack(
       clipBehavior: Clip.none,

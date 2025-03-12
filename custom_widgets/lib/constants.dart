@@ -119,6 +119,4 @@ class Constants {
   final Color subFontColor;
 
   final String imgPath;
-
-  final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 }

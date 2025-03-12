@@ -135,6 +135,7 @@ class SiteSelectionState extends State<SiteSelection> {
 
   double calculateTextWidth(String text) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     final TextPainter textPainter = TextPainter(
       text: TextSpan(text: text, style: TextStyle(fontFamily: constants.fontFamily, fontSize: constants.semibigFontSize, fontWeight: constants.bold)),
       maxLines: 1,

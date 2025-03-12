@@ -7,6 +7,7 @@ import 'package:flutter_cupernino_bottom_sheet/flutter_cupernino_bottom_sheet.da
 
 class CustomModalPopup {
   final Constants constants = Constants();
+  final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
   void show(context, String titel, Widget widget, {bool neverScrollPhysics = false}) {
     Navigator.of(context).push(

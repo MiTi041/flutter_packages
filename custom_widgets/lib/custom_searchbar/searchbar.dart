@@ -76,6 +76,7 @@ class SearchbarState extends State<Searchbar> {
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
     return Container(
       margin: const EdgeInsets.only(left: 0, right: 0, bottom: 0),

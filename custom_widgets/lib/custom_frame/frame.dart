@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:custom_utils/custom_vibrate.dart';
 
 class Frame extends StatefulWidget {
-  final Widget appbar;
+  final Widget? appbar;
   final Widget? bottombar;
   final Widget widget;
   final bool isPageView;
@@ -25,7 +25,7 @@ class Frame extends StatefulWidget {
   final bool isModalPopup;
 
   const Frame({
-    required this.appbar,
+    this.appbar,
     this.bottombar,
     required this.widget,
     this.isPageView = false,
@@ -111,6 +111,7 @@ class FrameState extends State<Frame> with Vibrate {
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     final frameProvider = Provider.of<FrameProvider>(context, listen: true);
 
     return Material(
@@ -141,7 +142,7 @@ class FrameState extends State<Frame> with Vibrate {
                           },
                           builder: (context, refreshState, pulledExtent, refreshTriggerPullDistance, refreshIndicatorExtent) {
                             return Padding(
-                              padding: EdgeInsets.only(top: frameProvider.appbarHeight),
+                              padding: EdgeInsets.only(top: widget.appbar != null ? frameProvider.appbarHeight : 0),
                               child: CupertinoSliverRefreshControl.buildRefreshIndicator(context, refreshState, pulledExtent, refreshTriggerPullDistance, refreshIndicatorExtent),
                             );
                           },
@@ -156,7 +157,7 @@ class FrameState extends State<Frame> with Vibrate {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              widget.isModalPopup ? Gap(frameProvider.modalPopupAppbarHeight) : Gap(frameProvider.appbarHeight),
+                              widget.isModalPopup ? Gap(frameProvider.modalPopupAppbarHeight) : Gap(widget.appbar != null ? frameProvider.appbarHeight : 0),
                               const Gap(15),
                               widget.widget,
                               if (!widget.isModalPopup) Gap(max(0, MediaQuery.of(context).viewInsets.bottom)),
@@ -168,7 +169,7 @@ class FrameState extends State<Frame> with Vibrate {
                     ],
                   ),
                 ),
-          Positioned(top: 0, left: 0, right: 0, child: widget.appbar),
+          if (widget.appbar != null) Positioned(top: 0, left: 0, right: 0, child: widget.appbar!),
           if (widget.bottombar != null)
             Positioned(
               bottom: 0,

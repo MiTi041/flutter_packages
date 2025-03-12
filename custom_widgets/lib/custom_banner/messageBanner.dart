@@ -67,6 +67,7 @@ class MessageBannerState extends State<MessageBanner> {
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
     return Container(
       width: double.infinity,

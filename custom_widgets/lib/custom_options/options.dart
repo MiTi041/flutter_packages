@@ -18,6 +18,7 @@ class Options with Navigate {
 
   OverlayEntry? overlayEntry;
   final Constants constants = Constants();
+  final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
   void closeOptions() {
     overlayEntry?.remove();
@@ -42,6 +43,9 @@ class Options with Navigate {
           closeOptions();
         },
         close: () {
+          closeOptions();
+        },
+        outerTap: () {
           closeOptions();
         },
       ),

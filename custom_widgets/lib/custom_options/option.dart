@@ -4,12 +4,11 @@ import 'package:gap/gap.dart';
 
 class Option extends StatelessWidget {
   final String text;
-  final String? icon;
-  final bool isIcon;
+  final IconData? icon;
 
   final VoidCallback? click;
 
-  const Option({required this.text, this.icon, required this.click, this.isIcon = false, super.key});
+  const Option({required this.text, this.icon, required this.click, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +32,13 @@ class Option extends StatelessWidget {
                 height: 36,
                 width: 36,
                 decoration: BoxDecoration(color: constants.fontColor, borderRadius: BorderRadius.circular(50)),
-                child: Center(child: isIcon ? SizedBox(height: 12, width: 12, child: Image.asset('${constants.imgPath}$icon')) : Text(" $icon", textAlign: TextAlign.center)),
+                child: Center(
+                  child: Icon(
+                    icon,
+                    size: 17,
+                    color: constants.background,
+                  ),
+                ),
               ),
             ],
           ],

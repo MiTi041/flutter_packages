@@ -72,6 +72,7 @@ class AppbarState extends State<Appbar> with Navigate {
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
+    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     final frameProvider = Provider.of<FrameProvider>(context, listen: true);
 
     return GestureDetector(

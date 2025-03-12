@@ -536,9 +536,9 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
             SiteSelection(
               preSelectedIndex: preSelectedIndex,
               items: siteSelectionItems,
-              select: (int value) {
+              select: (int value) async {
                 select(value);
-                return value;
+                return true;
               },
             ),
           ],

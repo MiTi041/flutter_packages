@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 
 class SiteSelection extends StatefulWidget {
   final List<SiteSelectionItem> items;
-  final Function(int)? select;
+  final Future<bool> Function(int value)? select;
   final int? preSelectedIndex;
 
   const SiteSelection({
@@ -52,14 +52,18 @@ class SiteSelectionState extends State<SiteSelection> {
   Future<void> load() async {}
 
   // Functions
-  void select(index) {
-    Vibrate().vibrateLight();
+  void select(index) async {
     if (widget.select != null && sliderSelection != index) {
-      setState(() {
-        sliderSelection = index;
-      });
-      widget.select!(index);
+      Vibrate().vibrateLight();
+      final newIndex = index;
+
+      if (await widget.select?.call(newIndex) ?? true) {
+        Vibrate().vibrateSuccess();
+        sliderSelection = newIndex;
+      }
     }
+
+    setState(() {});
   }
 
   @override

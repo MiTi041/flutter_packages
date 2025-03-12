@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 import 'package:custom_widgets/custom_frame/frame_provider.dart';
 import 'package:custom_utils/custom_navigate.dart';
@@ -111,14 +110,8 @@ class AppbarState extends State<Appbar> with Navigate {
           ),
           Container(
             key: appbarKey,
-            margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top + (widget.isModalPopup ? 0 : 20)),
-            padding: EdgeInsets.fromLTRB(
-                15,
-                widget.isModalPopup
-                    ? 10 // Wenn iOS und ModalPopup, dann 10, sonst 5
-                    : (Platform.isIOS ? 5 : 0), // Wenn Android und ModalPopup, dann 10, sonst 0
-                15,
-                10),
+            margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top + (widget.isModalPopup ? 0 : 10)),
+            padding: EdgeInsets.fromLTRB(15, widget.isModalPopup ? 10 : 0, 15, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,

@@ -53,6 +53,7 @@ class Message {
               },
       ),
     );
+
     Overlay.of(context).insert(message!);
 
     return completer.future;

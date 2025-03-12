@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:custom_widgets/custom_appbar/appbar.dart';
 import 'package:custom_widgets/custom_frame/frame_provider.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:custom_widgets/custom_list/customList.dart';
@@ -12,7 +11,6 @@ import 'package:custom_utils/custom_vibrate.dart';
 
 class Frame extends StatefulWidget {
   final Widget appbar;
-  final GlobalKey<AppbarState>? appbarKey;
   final Widget? bottombar;
   final Widget widget;
   final bool isPageView;
@@ -27,7 +25,6 @@ class Frame extends StatefulWidget {
   final bool isModalPopup;
 
   const Frame({
-    this.appbarKey,
     required this.appbar,
     this.bottombar,
     required this.widget,

@@ -69,10 +69,10 @@ class ToggleState extends State<Toggle> {
   // Functions
   Future<void> toggle() async {
     Vibrate().vibrateLight();
-
     final newState = !isToggled;
 
     if (await widget.onToggle?.call(newState) ?? true) {
+      Vibrate().vibrateSuccess();
       isToggled = newState;
     }
 

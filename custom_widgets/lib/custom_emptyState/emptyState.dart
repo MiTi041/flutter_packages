@@ -31,7 +31,17 @@ class EmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (illustration != null) Column(children: [Container(width: double.infinity, constraints: const BoxConstraints(maxHeight: 100), child: illustration!), const Gap(15)]),
+            if (illustration != null)
+              Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    constraints: const BoxConstraints(maxHeight: 100),
+                    child: illustration!,
+                  ),
+                  const Gap(15),
+                ],
+              ),
             Text(
               title,
               textAlign: TextAlign.center,

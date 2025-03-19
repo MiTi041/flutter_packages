@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:custom_widgets/custom_snackbar/snackBarStatus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:custom_widgets/constants.dart';
@@ -70,7 +71,7 @@ class CustomSnackbarState extends State<CustomSnackbar> {
     setState(() {
       isSliding = false; // Starten der Aufwärtsbewegung
     });
-    timerClose = Timer(const Duration(milliseconds: 150), () {
+    timerClose = Timer(const Duration(milliseconds: 200), () {
       widget.slideUpSnackBar();
     });
   }
@@ -102,14 +103,14 @@ class CustomSnackbarState extends State<CustomSnackbar> {
           child: Container(
             key: snackbarKey,
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(20, 20 + MediaQuery.of(context).padding.top, 20, 20),
+            padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top, 20, 20),
             decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(0), border: Border(bottom: BorderSide(color: lineColor, width: 1))),
             child: Column(
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    if (_getIconPath(widget.status) != null) Row(children: [Image.asset(_getIconPath(widget.status)!, height: 30, width: 30), const Gap(10)]),
+                    if (_getIconPath(widget.status) != null) Row(children: [Image.asset(_getIconPath(widget.status)!, height: 30, width: 30, package: 'custom_widgets'), const Gap(10)]),
                     Expanded(
                       child: Text(
                         widget.text,
@@ -122,7 +123,7 @@ class CustomSnackbarState extends State<CustomSnackbar> {
                         height: 30,
                         width: 30,
                         color: Colors.transparent,
-                        child: Align(alignment: Alignment.centerRight, child: SizedBox(height: 12, child: Image.asset('${constants.imgPath}cross.png'))),
+                        child: Align(alignment: Alignment.centerRight, child: Icon(CupertinoIcons.xmark, color: constants.fontColor, size: 12)),
                       ),
                     ),
                   ],

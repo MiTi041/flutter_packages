@@ -1,3 +1,4 @@
+import 'package:custom_widgets/custom_clickAnimationWrap.dart/clickAnimationWrap.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:custom_widgets/constants.dart';
@@ -10,6 +11,7 @@ class AppbarButton extends StatelessWidget {
   final Color? borderColor;
 
   final VoidCallback? click;
+  final VoidCallback? longPress;
 
   const AppbarButton({
     this.text,
@@ -18,6 +20,7 @@ class AppbarButton extends StatelessWidget {
     this.fontColor,
     this.borderColor,
     this.click,
+    this.longPress,
     super.key,
   });
 
@@ -26,15 +29,28 @@ class AppbarButton extends StatelessWidget {
     final Constants constants = Constants();
     final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
-    return GestureDetector(
+    return ClickAnimationWrap(
+      disabled: click == null,
       onTap: () {
         if (click != null) click!();
+      },
+      onLongPress: () {
+        if (longPress != null) longPress!();
       },
       child: Container(
         height: 30,
         constraints: const BoxConstraints(minWidth: 30),
-        padding: EdgeInsets.fromLTRB(text != null ? 15 : 0, 0, text != null ? 15 : 0, 0),
-        decoration: BoxDecoration(color: color ?? constants.primary, border: Border.all(color: borderColor ?? constants.secondary, width: 1), borderRadius: BorderRadius.circular(50)),
+        padding: EdgeInsets.fromLTRB(
+          text != null && icon == null ? 10 : (icon != null && text != null ? 5 : 0),
+          0,
+          text != null ? 10 : 0,
+          0,
+        ),
+        decoration: BoxDecoration(
+          color: color ?? constants.primary,
+          border: Border.all(color: borderColor ?? constants.secondary, width: 1),
+          borderRadius: BorderRadius.circular(50),
+        ),
         child: Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -42,7 +58,19 @@ class AppbarButton extends StatelessWidget {
               if (icon != null) Icon(icon, size: 17, color: fontColor ?? constants.fontColor),
               if (icon != null && text != null) const Gap(5),
               if (text != null)
-                Text(text!, style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: fontColor ?? constants.fontColor, fontWeight: constants.bold)),
+                Expanded(
+                  child: Text(
+                    text!,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      height: 1,
+                      fontFamily: constants.fontFamily,
+                      fontSize: constants.mediumFontSize,
+                      color: fontColor ?? constants.fontColor,
+                      fontWeight: constants.bold,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),

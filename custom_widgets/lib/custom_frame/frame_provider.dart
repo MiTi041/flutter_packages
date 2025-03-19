@@ -17,7 +17,7 @@ class FrameProvider with ChangeNotifier {
   }
 
   //appbarNavbarHeight
-  double appbarHeight = 129.0; // normalerweise - muss angegeben werden dmit die erste seite weiß wie hoch die appbar ist
+  double appbarHeight = 129.0; // normalerweise - muss angegeben werden damit die erste seite weiß wie hoch die appbar ist
   bool isAppbarBlurred = false;
   double modalPopupAppbarHeight = 0.0;
   double bottombarHeight = 0.0;

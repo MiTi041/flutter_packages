@@ -1,3 +1,4 @@
+import 'package:custom_widgets/custom_button/button.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:custom_widgets/constants.dart';
@@ -8,8 +9,9 @@ class MessageBanner extends StatefulWidget {
   final String text;
   final MessageType type;
   final VoidCallback? close;
+  final Button? button;
 
-  const MessageBanner({required this.text, this.type = MessageType.info, this.close, super.key});
+  const MessageBanner({required this.text, this.type = MessageType.info, this.close, this.button, super.key});
 
   @override
   MessageBannerState createState() => MessageBannerState();
@@ -73,15 +75,24 @@ class MessageBannerState extends State<MessageBanner> {
       width: double.infinity,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(color: _getBannerColor(constants), borderRadius: BorderRadius.circular(15)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
         children: [
-          Image.asset(_getBannerIcon(), height: 20),
-          const Gap(5),
-          Flexible(
-            child: Text(widget.text, style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: _getTextColor(constants), fontWeight: constants.medium)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(_getBannerIcon(), height: 20, package: 'custom_widgets'),
+              const Gap(10),
+              Flexible(
+                child:
+                    Text(widget.text, style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: _getTextColor(constants), fontWeight: constants.semi)),
+              ),
+              if (widget.close != null) ...[const Gap(10), IconButton(icon: Icon(Icons.close, color: _getTextColor(constants)), onPressed: widget.close)],
+            ],
           ),
-          if (widget.close != null) ...[const Gap(10), IconButton(icon: Icon(Icons.close, color: _getTextColor(constants)), onPressed: widget.close)],
+          if (widget.button != null) ...[
+            const Gap(10),
+            widget.button!,
+          ],
         ],
       ),
     );

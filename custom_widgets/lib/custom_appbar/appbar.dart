@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:custom_widgets/custom_frame/frame_provider.dart';
 import 'package:custom_utils/custom_navigate.dart';
 import 'package:custom_utils/custom_vibrate.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:gap/gap.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:provider/provider.dart';
@@ -47,7 +47,6 @@ class AppbarState extends State<Appbar> with Navigate {
     frameProvider = Provider.of<FrameProvider>(context, listen: false);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      frameProvider.refreshIsAppbarBlurred(false);
       getHeight();
       load();
     });
@@ -89,7 +88,11 @@ class AppbarState extends State<Appbar> with Navigate {
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 100),
               curve: Curves.linear,
-              opacity: frameProvider.isAppbarBlurred ? 1 : 0,
+              opacity: frameProvider.isAppbarBlurred
+                  ? 1
+                  : widget.isModalPopup
+                      ? 1
+                      : 0,
               child: ClipRRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
@@ -126,13 +129,17 @@ class AppbarState extends State<Appbar> with Navigate {
                       if (!widget.isModalPopup && widget.showBackButton) ...[
                         GestureDetector(
                           onTap: () {
-                            Navigator.pop(context);
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            } else {
+                              Navigator.pushReplacementNamed(context, '/');
+                            }
                           },
                           child: Container(
                             height: 30,
                             width: 30,
-                            color: Colors.transparent,
-                            child: Center(child: SizedBox(height: 15, width: 15, child: Image.asset('${constants.imgPath}arrowBack.png'))),
+                            color: CupertinoColors.transparent,
+                            child: Center(child: Icon(CupertinoIcons.left_chevron, size: 20)),
                           ),
                         ),
                       ],

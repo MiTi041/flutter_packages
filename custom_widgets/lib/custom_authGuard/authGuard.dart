@@ -39,7 +39,7 @@ class AuthGuardState extends State<AuthGuard> {
   @override
   void initState() {
     super.initState();
-    authenticateUser();
+    if (!widget.disabled) authenticateUser();
   }
 
   // Functions
@@ -50,7 +50,7 @@ class AuthGuardState extends State<AuthGuard> {
     try {
       return await auth.authenticate(
         localizedReason: 'Bitte authentifizieren Sie sich mit Face ID.',
-        options: const AuthenticationOptions(biometricOnly: true),
+        options: const AuthenticationOptions(),
       );
     } catch (e) {
       return false;
@@ -79,6 +79,8 @@ class AuthGuardState extends State<AuthGuard> {
   Widget build(BuildContext context) {
     final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     Constants constants = Constants();
+
+    if (widget.disabled) return widget.child;
 
     if (isChecking) {
       return Frame(

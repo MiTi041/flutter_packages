@@ -33,7 +33,6 @@ class CustomListWidget {
   final double skeletonBorderRadius;
   final SiteSelectionItem? siteSelectionItem;
   final List<Map<String, dynamic>>? ownDataList;
-  final int? searchParamCount;
   final Widget? customSkeleton;
   final bool showNotTheSkeleton;
   final List<Widget>? emptyState;
@@ -50,7 +49,6 @@ class CustomListWidget {
     this.skeletonBorderRadius = 15,
     this.siteSelectionItem,
     this.ownDataList,
-    this.searchParamCount,
     this.customSkeleton,
     this.showNotTheSkeleton = false,
     this.emptyState,
@@ -174,24 +172,13 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
       CustomListWidget widgetConfig = widget.widgets[preSelectedIndex ?? sliderSelection];
       QueryInfo queryInfo = widgetConfig.queryInfo;
 
-      List<String> searchParam = [];
-
-      if (widgetConfig.searchParamCount != null) {
-        for (int i = 0; i < widgetConfig.searchParamCount!; i++) {
-          searchParam.add('$searchbarValue%');
-          searchParam.add(searchbarValue);
-        }
-      }
-
       List<Map<String, dynamic>> results;
 
       // Falls es eine Datumsspalte gibt, füge sie der Selektion hinzu
-      String selectString = 'id';
+      String selectString = 'id, ${queryInfo.orderByColumn}';
       if (widgetConfig.dateColumnName != null) {
         selectString = 'id, ${widgetConfig.dateColumnName}';
       }
-
-      String filterColumn = queryInfo.filterByColumn!;
 
       // Anwendung der where-Bedingung
       var query = Supabase.instance.client.from(queryInfo.table).select(selectString);
@@ -204,15 +191,19 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
       }
 
       if (queryInfo.filterByColumn != null && searchbarValue.isNotEmpty) {
-        // Anwendung der ilike-Bedingung für die Filterung
-        query = query.ilike(filterColumn, '$searchbarValue%');
+        List<String> filterColumns = queryInfo.filterByColumn!.split(',').map((e) => e.trim()).toList();
+
+        List<String> conditions = filterColumns.map((col) => '$col.ilike."$searchbarValue%"').toList();
+
+        query = query.or(conditions.join(','));
       }
 
       // Abfrage ausführen mit optionaler Sortierung und Paginierung
       results = await query
           .order(
-            widgetConfig.dateColumnName != null ? widgetConfig.dateColumnName! : queryInfo.orderByColumn,
+            queryInfo.orderByColumn,
             ascending: queryInfo.ascending,
+            nullsFirst: false,
           )
           .range(offset, offset + limit - 1);
 
@@ -406,34 +397,55 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
   }
 
   Future<void> addItemWithId(int id) async {
-    CustomListWidget widgetConfig = widget.widgets[preSelectedIndex ?? sliderSelection];
+    int selectedIndex = preSelectedIndex ?? sliderSelection;
+    CustomListWidget widgetConfig = widget.widgets[selectedIndex];
     QueryInfo queryInfo = widgetConfig.queryInfo;
 
-    // Um das Item nicht bei den Suchergebnissen einzufügen
+    // Suchergebnisse zurücksetzen, wenn eine Suche aktiv ist
     if (searchbarValue.isNotEmpty) {
-      setState(() {
-        searchbarValue = "";
-      });
+      setState(() => searchbarValue = "");
       resetList();
       await load(withoutLoading: true);
     }
 
+    // Spalten definieren (id + optional Datum)
     String selectString = 'id';
     if (widgetConfig.dateColumnName != null) {
-      selectString = 'id, ${widgetConfig.dateColumnName}';
+      selectString += ', ${widgetConfig.dateColumnName}';
     }
 
-    List<Map<String, dynamic>> result = await supabase.from(queryInfo.table).select(selectString).eq('id', id);
+    // Datenbankabfrage
+    var query = supabase.from(queryInfo.table).select(selectString).eq('id', id);
 
+    // Falls ein WHERE-Filter definiert ist
+    if (queryInfo.where != null) {
+      for (var where in queryInfo.where!) {
+        if (where.length >= 2 && where[0] != null && where[1] != null) {
+          query = query.eq(where[0], where[1]);
+        }
+      }
+    }
+
+    // Sortierung und Paginierung
+    List<Map<String, dynamic>> result = await query
+        .order(
+          widgetConfig.dateColumnName ?? queryInfo.orderByColumn,
+          ascending: queryInfo.ascending,
+          nullsFirst: false,
+        )
+        .range(0, 0); // Nur ein Ergebnis notwendig
+
+    // Falls ein Item gefunden wurde
     if (result.isNotEmpty) {
       setState(() {
+        var newItem = {'id': id, ...result[0]};
         if (widgetConfig.dateColumnName != null) {
-          data[sliderSelection].insert(0, {...result[0], 'id': id, 'date': result[0][widgetConfig.dateColumnName]});
-        } else {
-          data[sliderSelection].insert(0, {...result[0], 'id': id});
+          newItem['date'] = result[0][widgetConfig.dateColumnName];
         }
+        data[selectedIndex].insert(0, newItem);
       });
 
+      // Leichte Verzögerung für sanftes Scrollen
       Future.delayed(const Duration(milliseconds: 500), () {
         scrollToWidgetWithId(id);
       });

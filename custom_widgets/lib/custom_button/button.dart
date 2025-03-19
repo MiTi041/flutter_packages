@@ -1,17 +1,19 @@
+import 'package:custom_widgets/custom_clickAnimationWrap.dart/clickAnimationWrap.dart';
 import 'package:gap/gap.dart';
 import 'package:custom_utils/custom_vibrate.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:flutter/cupertino.dart';
 
-class Button extends StatefulWidget with Vibrate {
+class Button extends StatefulWidget {
   final Color? color;
-  final String text;
+  final String? text;
   final bool loader;
   final bool minWidth;
   final BorderRadius borderRadius;
   final Border? border;
   final Color? fontColor;
   final bool deactivated;
+  final bool noAnimation;
   final String? textIcon;
   final IconData? icon;
   final EdgeInsets? padding;
@@ -20,10 +22,11 @@ class Button extends StatefulWidget with Vibrate {
   final VoidCallback? click;
 
   const Button({
-    required this.text,
+    this.text,
     this.color,
     this.loader = false,
     this.deactivated = false,
+    this.noAnimation = false,
     this.minWidth = false,
     this.borderRadius = const BorderRadius.all(Radius.circular(12)),
     this.border,
@@ -69,20 +72,13 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
 
   @override
   void dispose() {
-    animationController.dispose(); // Dispose the animation controller
+    animationController.dispose();
     super.dispose();
   }
 
   // Function to handle tap
   void onTap() {
     if (widget.deactivated) return;
-
-    // Start the animation
-    animationController.forward().then((_) {
-      // Reverse the animation after it completes
-      animationController.reverse();
-    });
-
     // Vibrate and trigger click
     vibrateLight();
     if (widget.click != null) widget.click!();
@@ -93,65 +89,47 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
     final Constants constants = Constants();
     final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
-    return GestureDetector(
+    return ClickAnimationWrap(
+      disabled: widget.noAnimation || widget.deactivated,
       onTap: onTap,
-      child: AnimatedBuilder(
-        animation: opacityAnimation,
-        builder: (context, child) {
-          return Opacity(
-            opacity: widget.deactivated ? 0.2 : opacityAnimation.value,
-            child: Container(
-              width: widget.minWidth ? null : double.infinity,
-              padding: widget.padding ?? const EdgeInsets.all(15),
-              decoration: BoxDecoration(color: widget.color ?? color, borderRadius: widget.borderRadius, border: widget.border),
-              child: Center(
-                child: !widget.loader
-                    ? SizedBox(
-                        width: double.infinity,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Expanded(
-                              flex: widget.spaceBetweenTextAndIcon ? 1 : 0,
-                              child: Text(
-                                widget.text,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  height: 1,
-                                  fontFamily: constants.fontFamily,
-                                  fontSize: constants.mediumFontSize,
-                                  color: widget.fontColor ?? constants.fontColor,
-                                  fontWeight: constants.medium,
-                                ),
-                              ),
+      child: Container(
+        width: widget.minWidth ? null : double.infinity,
+        padding: widget.padding ?? const EdgeInsets.all(15),
+        decoration: BoxDecoration(color: widget.color ?? color, borderRadius: widget.borderRadius, border: widget.border),
+        child: Center(
+          child: !widget.loader
+              ? SizedBox(
+                  width: widget.minWidth ? null : double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      if (widget.text != null) ...[
+                        Expanded(
+                          flex: widget.spaceBetweenTextAndIcon ? 1 : 0,
+                          child: Text(
+                            widget.text!,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              height: 1,
+                              fontFamily: constants.fontFamily,
+                              fontSize: constants.mediumFontSize,
+                              color: widget.fontColor ?? constants.fontColor,
+                              fontWeight: constants.medium,
                             ),
-                            if (widget.textIcon != null) ...[
-                              const Gap(5),
-                              Text(
-                                widget.textIcon!,
-                                style: TextStyle(
-                                  height: 1,
-                                  fontFamily: constants.fontFamily,
-                                  fontSize: constants.mediumFontSize,
-                                  color: widget.fontColor ?? constants.fontColor,
-                                  fontWeight: constants.medium,
-                                ),
-                              ),
-                            ],
-                            if (widget.icon != null) ...[
-                              const Gap(5),
-                              Icon(widget.icon, size: 17, color: widget.fontColor ?? constants.fontColor),
-                            ],
-                          ],
+                          ),
                         ),
-                      )
-                    : CupertinoActivityIndicator(color: widget.fontColor ?? constants.fontColor, radius: 8.0),
-              ),
-            ),
-          );
-        },
+                        const Gap(5),
+                      ],
+                      if (widget.icon != null) ...[
+                        Icon(widget.icon, size: 15, color: widget.fontColor ?? constants.fontColor),
+                      ],
+                    ],
+                  ),
+                )
+              : CupertinoActivityIndicator(color: widget.fontColor ?? constants.fontColor, radius: 7.5),
+        ),
       ),
     );
   }

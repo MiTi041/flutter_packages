@@ -1,5 +1,7 @@
 library;
 
+export 'custom_authGuard/authGuard.dart';
+export 'constants.dart';
 export 'custom_appbar/appbar.dart';
 export 'custom_appbar/appbarButton.dart';
 export 'custom_banner/banner.dart';
@@ -27,3 +29,4 @@ export 'custom_snackbar/snackBar_provider.dart';
 export 'custom_snackbar/snackBarStatus.dart';
 export 'custom_snackbar/snackbar.dart';
 export 'custom_toggle/toggle.dart';
+export 'custom_pageSwitch/pageSwitch.dart';

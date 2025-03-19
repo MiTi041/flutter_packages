@@ -1,12 +1,13 @@
-import 'dart:io';
 import 'dart:ui';
+import 'package:custom_utils/custom_vibrate.dart';
 import 'package:custom_widgets/custom_frame/frame_provider.dart';
+import 'navbarItem.dart';
 import 'package:flutter/material.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:provider/provider.dart';
 
 class Navbar extends StatefulWidget {
-  final List<BottomNavigationBarItem> items;
+  final List<NavbarItem> items;
 
   const Navbar({required this.items, super.key});
 
@@ -14,15 +15,23 @@ class Navbar extends StatefulWidget {
   NavbarState createState() => NavbarState();
 }
 
-class NavbarState extends State<Navbar> {
+class NavbarState extends State<Navbar> with Vibrate {
   // Variables
   double navBarHeight = 0;
+  int selectedIndex = 0;
 
   // Instances
   final GlobalKey<NavbarState> navbarKey = GlobalKey<NavbarState>();
   late final FrameProvider frameProvider;
 
   // Standard
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -56,7 +65,7 @@ class NavbarState extends State<Navbar> {
     final Constants constants = Constants();
     final frameProvider = Provider.of<FrameProvider>(context, listen: true);
 
-    if (widget.items.length > 1) {
+    if (widget.items.length > 1 && widget.items.length < 6) {
       return Stack(
         children: [
           Positioned(
@@ -67,7 +76,15 @@ class NavbarState extends State<Navbar> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                 child: Container(
-                  decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.5), border: Border(top: BorderSide(color: constants.primary, width: 0.5))),
+                  decoration: BoxDecoration(
+                    color: constants.secondary.withValues(alpha: 0.3),
+                    border: Border(
+                      top: BorderSide(
+                        color: constants.third,
+                        width: 0.5,
+                      ),
+                    ),
+                  ),
                   height: navBarHeight,
                 ),
               ),
@@ -76,21 +93,40 @@ class NavbarState extends State<Navbar> {
           Container(
             key: navbarKey,
             decoration: const BoxDecoration(color: Colors.transparent),
-            padding: EdgeInsets.only(top: Platform.isIOS ? 20 : 0),
-            height: Platform.isIOS ? 84 : 70,
-            child: BottomNavigationBar(
-              selectedFontSize: 0,
-              unselectedFontSize: 0,
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              currentIndex: frameProvider.navIndex,
-              onTap: (int index) {
-                frameProvider.changeIndex(index);
-              },
-              type: BottomNavigationBarType.fixed,
-              items: <BottomNavigationBarItem>[for (var item in widget.items) item],
-              showUnselectedLabels: false,
-              showSelectedLabels: false,
+            padding: EdgeInsets.fromLTRB(15, 15, 15, MediaQuery.of(context).padding.bottom),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(
+                widget.items.length,
+                (i) {
+                  final isSelected = selectedIndex == i;
+
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        vibrateLight();
+                        if (selectedIndex != i) {
+                          setState(() => selectedIndex = i);
+                        }
+                        if (widget.items[i].click != null) {
+                          widget.items[i].click!();
+                        }
+                      },
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Center(
+                          child: NavbarItem(
+                            iconActive: widget.items[i].iconActive,
+                            iconInactive: widget.items[i].iconInactive,
+                            text: widget.items[i].text,
+                            isSelected: isSelected,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -98,18 +134,5 @@ class NavbarState extends State<Navbar> {
     } else {
       return Container();
     }
-  }
-}
-
-class NavbarItem extends StatelessWidget {
-  const NavbarItem({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-
-  BottomNavigationBarItem getItem({required Widget icon}) {
-    return BottomNavigationBarItem(icon: SizedBox(height: 20, child: Opacity(opacity: 0.5, child: icon)), activeIcon: SizedBox(height: 20, child: icon), label: '');
   }
 }

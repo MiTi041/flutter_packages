@@ -54,7 +54,14 @@ class FrameState extends State<Frame> with Vibrate {
   // Instanzen
   late final ScrollController scrollController;
 
-  // Standard
+  // standart
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -65,10 +72,12 @@ class FrameState extends State<Frame> with Vibrate {
       // um die appbar zu verändern wenn etwas unter ihr ist
       double offset = scrollController.offset;
 
-      if (offset > 0 && Provider.of<FrameProvider>(context, listen: false).isAppbarBlurred == false) {
-        Provider.of<FrameProvider>(context, listen: false).refreshIsAppbarBlurred(true);
-      } else if (offset <= 0 && Provider.of<FrameProvider>(context, listen: false).isAppbarBlurred == true) {
-        Provider.of<FrameProvider>(context, listen: false).refreshIsAppbarBlurred(false);
+      if (!widget.isModalPopup) {
+        if (offset > 10 && Provider.of<FrameProvider>(context, listen: false).isAppbarBlurred == false) {
+          Provider.of<FrameProvider>(context, listen: false).refreshIsAppbarBlurred(true);
+        } else if (offset <= 10 && Provider.of<FrameProvider>(context, listen: false).isAppbarBlurred == true) {
+          Provider.of<FrameProvider>(context, listen: false).refreshIsAppbarBlurred(false);
+        }
       }
 
       // um zu sagen ob die liste am ende ist
@@ -90,7 +99,9 @@ class FrameState extends State<Frame> with Vibrate {
       }
     });
 
-    load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      load();
+    });
   }
 
   @override
@@ -161,7 +172,7 @@ class FrameState extends State<Frame> with Vibrate {
                               const Gap(15),
                               widget.widget,
                               if (!widget.isModalPopup) Gap(max(0, MediaQuery.of(context).viewInsets.bottom)),
-                              if (widget.bottombar != null && widget.showBottomGap) ...[if (widget.bottombar is Navbar) Gap(frameProvider.bottombarHeight + 15)],
+                              if (widget.bottombar != null && widget.bottombar is Navbar) Gap(frameProvider.bottombarHeight + 15),
                             ],
                           ),
                         ),

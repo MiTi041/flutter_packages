@@ -138,7 +138,7 @@ class SearchbarState extends State<Searchbar> {
                       fontWeight: constants.medium,
                     ),
                   ),
-                  Positioned(left: 10, top: 10, bottom: 10, child: SizedBox(height: 15, width: 15, child: Image.asset('${constants.imgPath}lupe.png'))),
+                  Positioned(left: 10, top: 10, bottom: 10, child: Icon(CupertinoIcons.search, color: constants.fontColor, size: 20)),
                   if (inputText != "")
                     Positioned(
                       right: 10,
@@ -157,7 +157,7 @@ class SearchbarState extends State<Searchbar> {
                                 });
                                 FocusScope.of(context).requestFocus(focusNode);
                               },
-                              child: Icon(CupertinoIcons.xmark_circle_fill, color: constants.subFontColor, size: 20),
+                              child: Icon(CupertinoIcons.clear_thick_circled, color: constants.fontColor, size: 20),
                             ),
                     ),
                 ],

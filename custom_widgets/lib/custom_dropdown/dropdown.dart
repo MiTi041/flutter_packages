@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:custom_widgets/constants.dart';
@@ -138,7 +139,7 @@ class DropdownState extends State<Dropdown> {
                   borderRadius: BorderRadius.circular(12),
                   child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), child: Container(decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.4)))),
                 ),
-                Container(height: MediaQuery.of(context).size.height, width: MediaQuery.of(context).size.width, decoration: const BoxDecoration(color: Colors.transparent)),
+                Container(height: size.height, width: size.width, decoration: const BoxDecoration(color: Colors.transparent)),
               ],
             ),
           ),
@@ -148,8 +149,8 @@ class DropdownState extends State<Dropdown> {
                 color: Colors.transparent,
                 child: Container(
                   margin: const EdgeInsets.all(15),
-                  width: MediaQuery.of(context).size.width,
-                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 2),
+                  width: size.width,
+                  constraints: BoxConstraints(maxHeight: size.height / 2),
                   child: Container(
                     decoration: BoxDecoration(border: Border.all(color: constants.secondary, width: 1), color: constants.background, borderRadius: BorderRadius.circular(12)),
                     child: Container(
@@ -278,7 +279,7 @@ class DropdownState extends State<Dropdown> {
                 ),
                 Container(
                   margin: const EdgeInsets.only(left: 15),
-                  child: Transform.rotate(angle: (isFocused ? 0.5 : 1.5) * 3.1415927, child: SizedBox(height: 10, child: Image.asset('${constants.imgPath}arrowBack.png'))),
+                  child: Icon(CupertinoIcons.chevron_down, size: 15, color: constants.subFontColor),
                 ),
               ],
             ),

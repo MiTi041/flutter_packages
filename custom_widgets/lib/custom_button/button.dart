@@ -92,43 +92,50 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
     return ClickAnimationWrap(
       disabled: widget.noAnimation || widget.deactivated,
       onTap: onTap,
-      child: Container(
-        width: widget.minWidth ? null : double.infinity,
-        padding: widget.padding ?? const EdgeInsets.all(15),
-        decoration: BoxDecoration(color: widget.color ?? color, borderRadius: widget.borderRadius, border: widget.border),
-        child: Center(
-          child: !widget.loader
-              ? SizedBox(
-                  width: widget.minWidth ? null : double.infinity,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      if (widget.text != null) ...[
-                        Expanded(
-                          flex: widget.spaceBetweenTextAndIcon ? 1 : 0,
-                          child: Text(
-                            widget.text!,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              height: 1,
-                              fontFamily: constants.fontFamily,
-                              fontSize: constants.mediumFontSize,
-                              color: widget.fontColor ?? constants.fontColor,
-                              fontWeight: constants.medium,
+      child: Opacity(
+        opacity: widget.deactivated ? 0.5 : 1,
+        child: Container(
+          width: widget.minWidth ? null : double.infinity,
+          padding: widget.padding ?? const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: widget.color ?? color,
+            borderRadius: widget.borderRadius,
+            border: widget.border,
+          ),
+          child: Center(
+            child: !widget.loader
+                ? SizedBox(
+                    width: widget.minWidth ? null : double.infinity,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        if (widget.text != null) ...[
+                          Expanded(
+                            flex: widget.spaceBetweenTextAndIcon ? 1 : 0,
+                            child: Text(
+                              widget.text!,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                height: 1,
+                                fontFamily: constants.fontFamily,
+                                fontSize: constants.mediumFontSize,
+                                color: widget.fontColor ?? constants.fontColor,
+                                fontWeight: constants.medium,
+                              ),
                             ),
                           ),
-                        ),
-                        const Gap(5),
+                          const Gap(5),
+                        ],
+                        if (widget.icon != null) ...[
+                          Icon(widget.icon, size: 15, color: widget.fontColor ?? constants.fontColor),
+                        ],
                       ],
-                      if (widget.icon != null) ...[
-                        Icon(widget.icon, size: 15, color: widget.fontColor ?? constants.fontColor),
-                      ],
-                    ],
-                  ),
-                )
-              : CupertinoActivityIndicator(color: widget.fontColor ?? constants.fontColor, radius: 7.5),
+                    ),
+                  )
+                : CupertinoActivityIndicator(color: widget.fontColor ?? constants.fontColor, radius: 7.5),
+          ),
         ),
       ),
     );

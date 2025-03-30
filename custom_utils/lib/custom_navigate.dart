@@ -16,4 +16,37 @@ mixin class Navigate {
       }
     });
   }
+
+  void navigateToWithPop(BuildContext context, Widget page, {VoidCallback? isPopped}) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return child;
+        },
+      ),
+    ).then((_) {
+      if (isPopped != null) {
+        isPopped();
+      }
+    });
+  }
+
+  void navigateToWithPopRemovePrevious(BuildContext context, Widget page, {VoidCallback? isPopped}) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return child;
+        },
+      ),
+      (route) => false,
+    ).then((_) {
+      if (isPopped != null) {
+        isPopped();
+      }
+    });
+  }
 }

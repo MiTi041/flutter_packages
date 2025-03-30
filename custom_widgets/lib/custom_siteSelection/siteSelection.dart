@@ -74,7 +74,7 @@ class SiteSelectionState extends State<SiteSelection> {
     return Container(
       clipBehavior: Clip.none,
       decoration: const BoxDecoration(),
-      width: size.width,
+      width: size.width.clamp(0, 500),
       height: 40,
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -89,7 +89,7 @@ class SiteSelectionState extends State<SiteSelection> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.fastOutSlowIn,
-              width: sliderSelection == index ? ((size.width - 30) - (widget.items.length - 1) * 52) : 47,
+              width: sliderSelection == index ? ((size.width - 30).clamp(0, 500) - (widget.items.length - 1) * 52) : 47,
               margin: EdgeInsets.only(right: entry.key == widget.items.length - 1 ? 0 : 5),
               padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
               decoration: BoxDecoration(

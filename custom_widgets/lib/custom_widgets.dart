@@ -30,3 +30,4 @@ export 'custom_snackbar/snackBarStatus.dart';
 export 'custom_snackbar/snackbar.dart';
 export 'custom_toggle/toggle.dart';
 export 'custom_pageSwitch/pageSwitch.dart';
+export 'custom_chart/chart.dart';

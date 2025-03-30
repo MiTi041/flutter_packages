@@ -6,13 +6,14 @@ import 'package:gap/gap.dart';
 
 class Item extends StatefulWidget {
   final String titel;
+  final String? subTitel;
   final List<Widget> content;
   final Constants? constants;
   final Border? border;
   final Function()? click;
   final Function()? longPress;
 
-  const Item({this.titel = "", required this.content, this.constants, this.border, this.click, this.longPress, super.key});
+  const Item({this.titel = "", this.subTitel, required this.content, this.constants, this.border, this.click, this.longPress, super.key});
 
   @override
   ItemState createState() => ItemState();
@@ -75,7 +76,7 @@ class ItemState extends State<Item> with SingleTickerProviderStateMixin, Vibrate
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.titel != "") ...[
+                if (widget.titel.isNotEmpty) ...[
                   Text(
                     widget.titel,
                     overflow: TextOverflow.ellipsis,
@@ -85,6 +86,20 @@ class ItemState extends State<Item> with SingleTickerProviderStateMixin, Vibrate
                       fontSize: constants.semibigFontSize,
                       color: constants.fontColor,
                       fontWeight: constants.bold,
+                    ),
+                  ),
+                  widget.subTitel != null ? const Gap(5) : const Gap(10),
+                ],
+                if (widget.subTitel != null && widget.subTitel!.isNotEmpty) ...[
+                  Text(
+                    widget.subTitel!,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      height: 1,
+                      fontFamily: constants.fontFamily,
+                      fontSize: constants.regularFontSize,
+                      color: constants.subFontColor,
+                      fontWeight: constants.medium,
                     ),
                   ),
                   const Gap(10),

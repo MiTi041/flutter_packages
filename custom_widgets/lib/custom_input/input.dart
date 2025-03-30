@@ -18,6 +18,7 @@ class Input extends StatefulWidget {
   final BorderRadius borderRadius;
   final Color? backgroundColor;
   final VoidCallback? click;
+  final TextInputType keyboardType;
 
   const Input({
     required this.text,
@@ -34,6 +35,7 @@ class Input extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(9)),
     this.backgroundColor,
     this.click,
+    this.keyboardType = TextInputType.text,
     super.key,
   });
 
@@ -142,7 +144,7 @@ class InputState extends State<Input> {
             TextField(
               cursorColor: constants.fontColor,
               autocorrect: false,
-              keyboardType: widget.currency ? const TextInputType.numberWithOptions(decimal: true) : null,
+              keyboardType: widget.currency ? const TextInputType.numberWithOptions(decimal: true) : widget.keyboardType,
               onTapOutside: (value) {
                 setState(() {
                   isFocused = false;

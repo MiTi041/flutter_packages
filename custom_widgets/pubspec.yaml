@@ -15,7 +15,7 @@ dependencies:
   vibration: ^3.1.3
   #for development
   custom_utils:
-    path: /Users/michaeltissen/Projects/flutter_packages/custom_utils
+    path: /Volumes/MacDisk3_NVME/Projects/flutter_packages/custom_utils
   #custom_utils:
   #  git:
   #    url: https://github.com/MiTi041/flutter_packages.git
@@ -27,6 +27,7 @@ dependencies:
   flutter_fadein: ^2.0.0
   flutter_cupernino_bottom_sheet: ^1.0.8
   local_auth: ^2.3.0
+  fl_chart: ^0.70.2
 
 dev_dependencies:
   flutter_test:

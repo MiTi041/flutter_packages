@@ -139,7 +139,7 @@ class DropdownState extends State<Dropdown> {
                   borderRadius: BorderRadius.circular(12),
                   child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), child: Container(decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.4)))),
                 ),
-                Container(height: size.height, width: size.width, decoration: const BoxDecoration(color: Colors.transparent)),
+                Container(height: size.height, width: size.width.clamp(0, 300), decoration: const BoxDecoration(color: Colors.transparent)),
               ],
             ),
           ),
@@ -149,7 +149,7 @@ class DropdownState extends State<Dropdown> {
                 color: Colors.transparent,
                 child: Container(
                   margin: const EdgeInsets.all(15),
-                  width: size.width,
+                  width: size.width.clamp(0, 300),
                   constraints: BoxConstraints(maxHeight: size.height / 2),
                   child: Container(
                     decoration: BoxDecoration(border: Border.all(color: constants.secondary, width: 1), color: constants.background, borderRadius: BorderRadius.circular(12)),

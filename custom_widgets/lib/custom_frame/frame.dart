@@ -145,7 +145,9 @@ class FrameState extends State<Frame> with Vibrate {
                       if (widget.customListKey != null || widget.onRefresh != null)
                         CupertinoSliverRefreshControl(
                           onRefresh: () async {
-                            if (widget.customListKey != null) widget.customListKey!.currentState?.refresh();
+                            if (widget.customListKey != null) {
+                              widget.customListKey!.currentState?.refresh();
+                            }
                             if (widget.onRefresh != null) widget.onRefresh!();
                             vibrateHeavy();
 
@@ -170,7 +172,13 @@ class FrameState extends State<Frame> with Vibrate {
                             children: [
                               widget.isModalPopup ? Gap(frameProvider.modalPopupAppbarHeight) : Gap(widget.appbar != null ? frameProvider.appbarHeight : 0),
                               const Gap(15),
-                              widget.widget,
+                              Align(
+                                alignment: Alignment.topCenter,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(maxWidth: 500),
+                                  child: widget.widget,
+                                ),
+                              ),
                               if (!widget.isModalPopup) Gap(max(0, MediaQuery.of(context).viewInsets.bottom)),
                               if (widget.bottombar != null && widget.bottombar is Navbar) Gap(frameProvider.bottombarHeight + 15),
                             ],

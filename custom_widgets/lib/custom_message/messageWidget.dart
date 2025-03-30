@@ -82,7 +82,7 @@ class MessageWidgetState extends State<MessageWidget> {
                 borderRadius: BorderRadius.circular(20),
                 child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20), child: Container(decoration: BoxDecoration(color: constants.background.withValues(alpha: 0.4)))),
               ),
-              Container(height: size.height, width: size.width, decoration: const BoxDecoration(color: Colors.transparent)),
+              Container(height: size.height, width: size.width.clamp(0, 300), decoration: const BoxDecoration(color: Colors.transparent)),
             ],
           ),
         ),
@@ -92,7 +92,7 @@ class MessageWidgetState extends State<MessageWidget> {
               color: Colors.transparent,
               child: Container(
                 margin: const EdgeInsets.all(50),
-                width: MediaQuery.of(context).size.width,
+                width: size.width.clamp(0, 300),
                 constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height),
                 child: Container(
                   decoration: BoxDecoration(color: constants.background, borderRadius: BorderRadius.circular(20), border: Border.all(color: constants.primary)),

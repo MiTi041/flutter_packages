@@ -15,8 +15,9 @@ class Appbar extends StatefulWidget {
   final bool isModalPopup;
   final double opacity;
   final bool showBackButton;
+  final double blurValue;
 
-  const Appbar({this.titel, this.icon, this.actions, this.userId, this.isModalPopup = false, this.opacity = 0.0, this.showBackButton = false, super.key});
+  const Appbar({this.titel, this.icon, this.actions, this.userId, this.isModalPopup = false, this.opacity = 0.0, this.showBackButton = false, this.blurValue = 0.3, super.key});
 
   @override
   AppbarState createState() => AppbarState();
@@ -98,7 +99,7 @@ class AppbarState extends State<Appbar> with Navigate {
                   filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: constants.secondary.withValues(alpha: 0.3),
+                      color: constants.secondary.withValues(alpha: widget.blurValue),
                       border: Border(
                         bottom: BorderSide(
                           color: constants.third,
@@ -157,9 +158,9 @@ class AppbarState extends State<Appbar> with Navigate {
                                   style: TextStyle(
                                     height: 1,
                                     fontFamily: constants.fontFamily,
-                                    fontSize: constants.semibigFontSize,
+                                    fontSize: constants.bigFontSize,
                                     color: constants.fontColor,
-                                    fontWeight: constants.semi,
+                                    fontWeight: constants.bold,
                                   ),
                                 ),
                               ),
@@ -170,7 +171,7 @@ class AppbarState extends State<Appbar> with Navigate {
                   ),
                 ),
                 Expanded(
-                  child: widget.actions != null
+                  child: widget.actions != null && widget.actions!.isNotEmpty
                       ? Wrap(
                           runAlignment: WrapAlignment.center,
                           alignment: WrapAlignment.end,
@@ -180,7 +181,7 @@ class AppbarState extends State<Appbar> with Navigate {
                             return IntrinsicWidth(child: action);
                           }).toList(),
                         )
-                      : Container(),
+                      : Container(height: 30, width: 30, color: CupertinoColors.transparent),
                 ),
               ],
             ),

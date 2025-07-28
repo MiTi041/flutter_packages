@@ -1,31 +1,33 @@
-import 'package:custom_widgets/custom_frame/desktopFrame_provider.dart';
+import 'package:custom_widgets/custom_frame/frame_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable
-class NavbarItem extends StatefulWidget {
+class BottombarItem extends StatefulWidget {
   final IconData iconActive;
   final IconData? iconInactive;
   final String text;
   final Function()? click;
   bool isSelected;
+  final Color? activeColor;
 
-  NavbarItem({
+  BottombarItem({
     required this.iconActive,
     this.iconInactive,
     required this.text,
     this.click,
     this.isSelected = false,
+    this.activeColor,
     super.key,
   });
 
   @override
-  NavbarItemState createState() => NavbarItemState();
+  BottombarItemState createState() => BottombarItemState();
 }
 
-class NavbarItemState extends State<NavbarItem> {
+class BottombarItemState extends State<BottombarItem> {
   // Variables
 
   // Instances
@@ -59,7 +61,7 @@ class NavbarItemState extends State<NavbarItem> {
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
-    final desktopFrameProvider = Provider.of<DesktopFrameProvider>(context, listen: true);
+    final frameProvider = Provider.of<FrameProvider>(context, listen: true);
 
     IconData iconInactive = widget.iconInactive ?? widget.iconActive;
 
@@ -68,7 +70,7 @@ class NavbarItemState extends State<NavbarItem> {
         Icon(
           widget.isSelected ? widget.iconActive : iconInactive,
           size: 22,
-          color: widget.isSelected ? constants.fontColor : constants.subFontColor,
+          color: widget.isSelected ? widget.activeColor ?? constants.fontColor : constants.subFontColor,
         ),
         const Gap(1),
         Text(
@@ -79,7 +81,7 @@ class NavbarItemState extends State<NavbarItem> {
             textBaseline: TextBaseline.alphabetic,
             fontFamily: constants.fontFamily,
             fontSize: constants.regularFontSize,
-            color: widget.isSelected ? constants.fontColor : constants.subFontColor,
+            color: widget.isSelected ? widget.activeColor ?? constants.fontColor : constants.subFontColor,
             fontWeight: widget.isSelected ? constants.bold : constants.regular,
           ),
         ),

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 class Message {
   // message
   OverlayEntry? message;
+  Completer<bool>? completer;
 
   Future<bool> showMessage(
     context, {
@@ -12,8 +13,9 @@ class Message {
     Image? image,
     String? titel,
     String? text,
-    String buttonText = "Verstanden",
+    String buttonText = "",
     Color? fontColor,
+    List<Widget>? items,
     String? closeButton,
     Color? closeButtonColor,
     bool isTooltip = false,
@@ -21,8 +23,7 @@ class Message {
     Color? iconColor,
     bool outerTapDoesNotClose = false,
   }) {
-    Completer<bool> completer = Completer<bool>();
-
+    completer = Completer<bool>();
     FocusScope.of(context).unfocus();
 
     message = OverlayEntry(
@@ -37,18 +38,19 @@ class Message {
         closeButton: closeButton,
         closeButtonColor: closeButtonColor,
         iconColor: iconColor,
+        items: items,
         click: () {
-          completer.complete(true);
+          completer?.complete(true);
           closeMessage();
         },
         close: () {
-          completer.complete(false);
+          completer?.complete(false);
           closeMessage();
         },
         outerTap: outerTapDoesNotClose
             ? null
             : () {
-                completer.complete(outerTapReturnsTrue);
+                completer?.complete(outerTapReturnsTrue);
                 closeMessage();
               },
       ),
@@ -56,7 +58,13 @@ class Message {
 
     Overlay.of(context).insert(message!);
 
-    return completer.future;
+    return completer!.future;
+  }
+
+  void closeMessageAndCompleterWithFalse() {
+    completer?.complete(false);
+    message?.remove();
+    message = null;
   }
 
   void closeMessage() {

@@ -8,7 +8,7 @@ import 'package:gap/gap.dart';
 
 class Heatmap extends StatefulWidget {
   final String titel;
-  final String description;
+  final String? description;
   final Future<List<List<double>>> Function()? loadData;
   final String? unitName;
   final Color? color;
@@ -17,7 +17,7 @@ class Heatmap extends StatefulWidget {
   const Heatmap({
     super.key,
     required this.titel,
-    required this.description,
+    this.description,
     required this.loadData,
     this.color,
     this.showValue = true,
@@ -32,17 +32,9 @@ class HeatmapState extends State<Heatmap> with SupabaseHelper {
   // Variables
   bool isLoading = true;
 
-  List<List<double>> heatmapData = [
-    [0, 20, 30, 40, 50, 60, 70],
-    [15, 25, 35, 45, 55, 65, 75],
-    [20, 30, 40, 50, 60, 70, 80],
-    [25, 35, 45, 55, 65, 75, 85],
-    [30, 40, 50, 60, 70, 80, 90],
-    [35, 45, 55, 65, 75, 85, 95],
-    [40, 50, 60, 70, 80, 90, 100],
-  ];
+  List<List<double>> heatmapData = List.generate(7, (_) => List.filled(10, 0));
 
-  final List<String> daysOfWeek = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+  final List<String> daysOfWeek = ['Monday', 'Thuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   // Instances
 
@@ -75,6 +67,7 @@ class HeatmapState extends State<Heatmap> with SupabaseHelper {
 
     if (widget.loadData != null) {
       heatmapData = await widget.loadData!();
+      //print(heatmapData);
     }
 
     setState(() {
@@ -111,16 +104,16 @@ class HeatmapState extends State<Heatmap> with SupabaseHelper {
                       : Column(
                           spacing: 5,
                           children: List.generate(
-                            heatmapData.length,
-                            (weekIndex) {
+                            7,
+                            (dayIndex) {
                               return Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  // Wochentag links anzeigen
+                                  // Wochentag
                                   SizedBox(
-                                    width: 25,
+                                    width: 30,
                                     child: Text(
-                                      daysOfWeek[weekIndex].substring(0, 3),
+                                      daysOfWeek[dayIndex].substring(0, 3),
                                       textAlign: TextAlign.start,
                                       style: TextStyle(
                                         height: 1,
@@ -137,11 +130,32 @@ class HeatmapState extends State<Heatmap> with SupabaseHelper {
                                       spacing: 5,
                                       mainAxisAlignment: MainAxisAlignment.start,
                                       children: List.generate(
-                                        heatmapData[weekIndex].length,
-                                        (dayIndex) {
-                                          double value = heatmapData[weekIndex][dayIndex];
+                                        heatmapData[dayIndex].length,
+                                        (weekIndex) {
+                                          double value = heatmapData[dayIndex][weekIndex];
 
-                                          // Skalierte Farbe basierend auf maxValue
+                                          bool isFutureDayInCurrentWeek = false;
+                                          if (weekIndex == heatmapData[dayIndex].length - 1) {
+                                            // Letzte Woche (aktuelle Woche)
+                                            if (dayIndex > DateTime.now().weekday - 1) {
+                                              // Tag liegt nach heute
+                                              isFutureDayInCurrentWeek = true;
+                                            }
+                                          }
+
+                                          // Wenn Tag in Zukunft => einfach leeres Kästchen zeichnen
+                                          if (isFutureDayInCurrentWeek) {
+                                            value = 0;
+                                            return Flexible(
+                                              child: Container(
+                                                height: 20,
+                                                decoration: BoxDecoration(
+                                                  color: null,
+                                                ),
+                                              ),
+                                            );
+                                          }
+
                                           double normalizedValue = value / maxValue;
                                           Color color = Color.lerp(constants.secondary, widget.color ?? constants.blue, normalizedValue > 0 ? normalizedValue.clamp(0.5, 1) : 0)!;
 
@@ -156,7 +170,7 @@ class HeatmapState extends State<Heatmap> with SupabaseHelper {
                                               child: Center(
                                                 child: widget.showValue && normalizedValue != 0
                                                     ? Text(
-                                                        "$value",
+                                                        "$value$dayIndex",
                                                         style: TextStyle(
                                                           height: 1,
                                                           fontFamily: constants.fontFamily,

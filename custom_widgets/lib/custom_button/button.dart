@@ -112,18 +112,24 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         if (widget.text != null) ...[
-                          Expanded(
-                            flex: widget.spaceBetweenTextAndIcon ? 1 : 0,
-                            child: Text(
-                              widget.text!,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                height: 1,
-                                fontFamily: constants.fontFamily,
-                                fontSize: constants.mediumFontSize,
-                                color: widget.fontColor ?? constants.fontColor,
-                                fontWeight: constants.medium,
-                              ),
+                          Flexible(
+                            fit: widget.spaceBetweenTextAndIcon ? FlexFit.tight : FlexFit.loose,
+                            child: Row(
+                              mainAxisAlignment: widget.spaceBetweenTextAndIcon ? MainAxisAlignment.start : MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  widget.text!,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    height: 1,
+                                    fontFamily: constants.fontFamily,
+                                    fontSize: constants.mediumFontSize,
+                                    color: widget.fontColor ?? constants.fontColor,
+                                    fontWeight: constants.medium,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const Gap(5),
@@ -134,7 +140,7 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
                       ],
                     ),
                   )
-                : CupertinoActivityIndicator(color: widget.fontColor ?? constants.fontColor, radius: 7.5),
+                : CupertinoActivityIndicator(color: widget.fontColor ?? constants.fontColor, radius: 6),
           ),
         ),
       ),

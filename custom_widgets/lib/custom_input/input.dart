@@ -19,6 +19,9 @@ class Input extends StatefulWidget {
   final Color? backgroundColor;
   final VoidCallback? click;
   final TextInputType keyboardType;
+  final bool isTextArea;
+  final TextEditingController? controller;
+  final String? initValue;
 
   const Input({
     required this.text,
@@ -36,8 +39,11 @@ class Input extends StatefulWidget {
     this.backgroundColor,
     this.click,
     this.keyboardType = TextInputType.text,
+    this.isTextArea = false,
+    this.controller,
+    this.initValue,
     super.key,
-  });
+  }) : assert(value == null || initValue == null);
 
   @override
   InputState createState() => InputState();
@@ -47,7 +53,7 @@ class InputState extends State<Input> {
   late Constants constants;
   bool isFocused = false;
   String inputText = "";
-  final controller = TextEditingController();
+  late final TextEditingController controller;
   FocusNode focusNode = FocusNode();
   Timer? _scrollTimer;
   double keyboardHeight = 0;
@@ -55,6 +61,8 @@ class InputState extends State<Input> {
   @override
   void initState() {
     super.initState();
+
+    controller = widget.controller ?? TextEditingController();
 
     if (widget.constants == null) {
       constants = Constants();
@@ -65,6 +73,11 @@ class InputState extends State<Input> {
     if (widget.value != null) {
       controller.text = widget.value!;
       inputText = widget.value!;
+    }
+
+    if (widget.initValue != null) {
+      controller.text = widget.initValue!;
+      inputText = widget.initValue!;
     }
 
     focusNode.addListener(() {
@@ -95,7 +108,7 @@ class InputState extends State<Input> {
   @override
   void dispose() {
     _scrollTimer?.cancel();
-    controller.dispose();
+    if (widget.controller == null) controller.dispose();
     focusNode.dispose();
     super.dispose();
   }
@@ -152,8 +165,8 @@ class InputState extends State<Input> {
                 focusNode.unfocus();
               },
               controller: controller,
-              minLines: 1,
-              maxLines: 1,
+              minLines: widget.isTextArea ? 5 : 1,
+              maxLines: widget.isTextArea ? 10 : 1,
               focusNode: focusNode,
               onChanged: (value) {
                 if (widget.currency) {
@@ -197,7 +210,7 @@ class InputState extends State<Input> {
               decoration: InputDecoration(
                 isDense: true,
                 contentPadding: EdgeInsets.only(
-                    left: widget.icon != null
+                    left: widget.icon != null && !widget.isTextArea
                         ? widget.padding != null
                             ? widget.padding! + 22
                             : 35
@@ -235,7 +248,7 @@ class InputState extends State<Input> {
                 fontWeight: constants.semi,
               ),
             ),
-            if (widget.icon != null) ...[
+            if (widget.icon != null && !widget.isTextArea) ...[
               Positioned(
                 left: widget.padding ?? 10,
                 top: widget.padding ?? 10,

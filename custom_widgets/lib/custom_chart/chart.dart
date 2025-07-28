@@ -1,4 +1,3 @@
-import 'package:custom_utils/custom_supabaseHelper.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:custom_widgets/custom_emptyState/emptyState.dart';
 import 'package:custom_widgets/custom_item/item.dart';
@@ -29,7 +28,7 @@ class Chart extends StatefulWidget {
   State<Chart> createState() => ChartState();
 }
 
-class ChartState extends State<Chart> with SupabaseHelper {
+class ChartState extends State<Chart> {
   // Variables
   bool isLoading = true;
   List<FlSpot> chartData = [];

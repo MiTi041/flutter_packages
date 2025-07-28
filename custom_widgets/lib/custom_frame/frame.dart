@@ -1,8 +1,8 @@
 import 'dart:math';
+import 'package:custom_widgets/custom_bottombar/bottombar.dart';
 import 'package:custom_widgets/custom_frame/frame_provider.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:custom_widgets/custom_list/customList.dart';
-import 'package:custom_widgets/custom_navbar/navbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -180,7 +180,7 @@ class FrameState extends State<Frame> with Vibrate {
                                 ),
                               ),
                               if (!widget.isModalPopup) Gap(max(0, MediaQuery.of(context).viewInsets.bottom)),
-                              if (widget.bottombar != null && widget.bottombar is Navbar) Gap(frameProvider.bottombarHeight + 15),
+                              if (widget.bottombar != null && widget.bottombar is Bottombar) Gap(frameProvider.bottombarHeight + 15),
                             ],
                           ),
                         ),

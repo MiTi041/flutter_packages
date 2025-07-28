@@ -16,6 +16,7 @@ class MessageWidget extends StatefulWidget {
   final List<Widget>? items;
   final Color? closeButtonColor;
   final Color? iconColor;
+  final TextEditingController? inputController;
 
   final VoidCallback? click;
   final VoidCallback? close;
@@ -36,6 +37,7 @@ class MessageWidget extends StatefulWidget {
     this.items,
     this.closeButtonColor,
     this.iconColor,
+    this.inputController,
     super.key,
   });
 
@@ -141,16 +143,18 @@ class MessageWidgetState extends State<MessageWidget> {
                           style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.regularFontSize, color: constants.subFontColor, fontWeight: constants.medium),
                         ),
                       if (widget.items != null && widget.items!.isNotEmpty) Column(children: [const Gap(15), for (Widget item in widget.items!) item]),
-                      const Gap(15),
-                      Button(
-                        text: widget.buttonText,
-                        color: constants.secondary,
-                        border: Border.all(color: constants.third, width: 1),
-                        fontColor: widget.fontColor,
-                        click: () {
-                          if (widget.click != null) widget.click!();
-                        },
-                      ),
+                      if (widget.buttonText.isNotEmpty) ...[
+                        const Gap(15),
+                        Button(
+                          text: widget.buttonText,
+                          color: constants.secondary,
+                          border: Border.all(color: constants.third, width: 1),
+                          fontColor: widget.fontColor,
+                          click: () {
+                            if (widget.click != null) widget.click!();
+                          },
+                        ),
+                      ],
                       widget.closeButton != null
                           ? Column(
                               children: [

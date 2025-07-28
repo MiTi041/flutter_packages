@@ -2,19 +2,20 @@ import 'package:custom_widgets/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fadein/flutter_fadein.dart';
 import 'package:gap/gap.dart';
-import 'package:custom_widgets/custom_button/button.dart';
 
 class EmptyState extends StatelessWidget {
   final String title;
   final String? text;
   final Widget? illustration;
-  final List<Button> button;
+  final List<Widget> button;
+  final EdgeInsets? margin;
 
   const EmptyState({
     required this.title,
     this.text,
     this.illustration,
     this.button = const [],
+    this.margin = const EdgeInsets.all(50),
     super.key,
   });
 
@@ -26,7 +27,7 @@ class EmptyState extends StatelessWidget {
     return FadeIn(
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.all(50),
+        margin: margin ?? const EdgeInsets.all(50),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

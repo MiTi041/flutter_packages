@@ -28,6 +28,7 @@ dependencies:
   flutter_cupernino_bottom_sheet: ^1.0.8
   local_auth: ^2.3.0
   fl_chart: ^0.70.2
+  macos_window_utils: ^1.8.2
 
 dev_dependencies:
   flutter_test:

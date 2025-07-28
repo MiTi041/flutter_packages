@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:gap/gap.dart';
 import 'package:custom_widgets/constants.dart';
 
@@ -113,7 +113,7 @@ class CustomBannerState extends State<CustomBanner> {
                                       GestureDetector(
                                         onTap: () => close(),
                                         child: Container(
-                                          decoration: const BoxDecoration(color: Colors.transparent),
+                                          decoration: const BoxDecoration(color: CupertinoColors.transparent),
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                             child: Text(
@@ -139,10 +139,10 @@ class CustomBannerState extends State<CustomBanner> {
                     GestureDetector(
                       onTap: () => close(),
                       child: Container(
-                        height: 20,
-                        width: 20,
-                        decoration: const BoxDecoration(color: Colors.transparent),
-                        child: Center(child: SizedBox(height: 10, child: Image.asset('${constants.imgPath}cross.png'))),
+                        height: 10,
+                        width: 10,
+                        decoration: const BoxDecoration(color: CupertinoColors.transparent),
+                        child: Center(child: Icon(CupertinoIcons.xmark, size: 12, color: constants.fontColor)),
                       ),
                     ),
                   ],

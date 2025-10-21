@@ -16,6 +16,7 @@ class Button extends StatefulWidget {
   final bool noAnimation;
   final String? textIcon;
   final IconData? icon;
+  final Image? image;
   final EdgeInsets? padding;
   final bool spaceBetweenTextAndIcon;
 
@@ -33,6 +34,7 @@ class Button extends StatefulWidget {
     this.fontColor,
     this.click,
     this.icon,
+    this.image,
     this.textIcon,
     this.padding,
     this.spaceBetweenTextAndIcon = false,
@@ -111,6 +113,17 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
+                        if (widget.image != null) ...[
+                          SizedBox(
+                            width: 30,
+                            height: 30,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(3),
+                              child: widget.image,
+                            ),
+                          ),
+                          const Gap(5),
+                        ],
                         if (widget.text != null) ...[
                           Flexible(
                             fit: widget.spaceBetweenTextAndIcon ? FlexFit.tight : FlexFit.loose,

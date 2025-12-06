@@ -23,7 +23,13 @@ class QueryInfo {
   final bool ascending;
   final List<List<dynamic>>? where;
 
-  QueryInfo({required this.table, this.filterByColumn, required this.orderByColumn, this.ascending = false, this.where});
+  QueryInfo({
+    required this.table,
+    this.filterByColumn,
+    required this.orderByColumn,
+    this.ascending = false,
+    this.where,
+  });
 }
 
 class CustomListWidget {
@@ -40,7 +46,7 @@ class CustomListWidget {
   final int? showWidgetWithIdOnTop;
   final String? searchbarPlaceholder;
   final double spacing;
-  final QueryInfo queryInfo;
+  final QueryInfo? queryInfo;
 
   CustomListWidget({
     this.verticalItemCount = 1,
@@ -56,7 +62,7 @@ class CustomListWidget {
     this.showWidgetWithIdOnTop,
     this.searchbarPlaceholder,
     this.spacing = 10,
-    required this.queryInfo,
+    this.queryInfo,
   });
 }
 
@@ -148,6 +154,23 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant CustomList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Prüfen, ob ownDataList leer geworden ist
+    final currentList = widget.widgets[sliderSelection].ownDataList;
+    final oldList = oldWidget.widgets[sliderSelection].ownDataList;
+
+    if (oldList != null && currentList != null && oldList.isNotEmpty && currentList.isEmpty) {
+      // Neu zeichnen, damit EmptyState angezeigt wird
+      setState(() {
+        isDataInitialized[sliderSelection] = true;
+        isLoading = false;
+      });
+    }
+  }
+
   Future<void> refresh() async {
     setState(() {
       resetList();
@@ -170,72 +193,82 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
 
     if (sliderSelection < widget.widgets.length && !noMoreData) {
       CustomListWidget widgetConfig = widget.widgets[preSelectedIndex ?? sliderSelection];
-      QueryInfo queryInfo = widgetConfig.queryInfo;
+      QueryInfo? queryInfo = widgetConfig.queryInfo;
+      List<Map<String, dynamic>> results = [];
 
-      List<Map<String, dynamic>> results;
+      // Fall 1: Eigene Daten werden direkt übergeben → kein Supabase-Query
+      if (widgetConfig.ownDataList != null) {
+        results = List<Map<String, dynamic>>.from(widgetConfig.ownDataList!);
 
-      // Falls es eine Datumsspalte gibt, füge sie der Selektion hinzu
-      String selectString = 'id, ${queryInfo.orderByColumn}';
-      if (widgetConfig.dateColumnName != null) {
-        selectString = 'id, ${widgetConfig.dateColumnName}';
-      }
-
-      // Anwendung der where-Bedingung
-      var query = Supabase.instance.client.from(queryInfo.table).select(selectString);
-
-      // Optionales where hinzufügen, falls vorhanden
-      if (queryInfo.where != null) {
-        for (var where in queryInfo.where!) {
-          query = query.eq(where[0], where[1]);
+        // Suche lokal filtern, falls aktiv
+        if (searchbarValue.isNotEmpty && widgetConfig.searchbarPlaceholder != null) {
+          final search = searchbarValue.toLowerCase();
+          results = results.where((item) {
+            return item.values.any((value) => value.toString().toLowerCase().contains(search));
+          }).toList();
         }
-      }
 
-      if (queryInfo.filterByColumn != null && searchbarValue.isNotEmpty) {
-        List<String> filterColumns = queryInfo.filterByColumn!.split(',').map((e) => e.trim()).toList();
-
-        List<String> conditions = filterColumns.map((col) => '$col.ilike."$searchbarValue%"').toList();
-
-        query = query.or(conditions.join(','));
-      }
-
-      // Abfrage ausführen mit optionaler Sortierung und Paginierung
-      results = await query
-          .order(
-            queryInfo.orderByColumn,
-            ascending: queryInfo.ascending,
-            nullsFirst: false,
-          )
-          .range(offset, offset + limit - 1);
-
-      // Wenn es eine Datumsspalte gibt, benenne sie um
-      if (widgetConfig.dateColumnName != null) {
-        results = results.map((item) {
-          return {...item, 'date': item[widgetConfig.dateColumnName]};
-        }).toList();
-      }
-
-      // Prüfen, ob noch Daten vorhanden sind
-      if (results.isEmpty) {
-        noMoreData = true;
-        if (isSearch && isDataInitialized[sliderSelection]) {
-          data[sliderSelection].clear();
+        // Nach Datum sortieren falls vorhanden
+        if (widgetConfig.dateColumnName != null) {
+          results.sort((a, b) {
+            final dateA =
+                a[widgetConfig.dateColumnName] is DateTime ? a[widgetConfig.dateColumnName] as DateTime : DateTime.tryParse(a[widgetConfig.dateColumnName]?.toString() ?? '') ?? DateTime(1970);
+            final dateB =
+                b[widgetConfig.dateColumnName] is DateTime ? b[widgetConfig.dateColumnName] as DateTime : DateTime.tryParse(b[widgetConfig.dateColumnName]?.toString() ?? '') ?? DateTime(1970);
+            return dateB.compareTo(dateA);
+          });
         }
-      } else {
-        alreadyLoadedResults += results.length;
 
-        if (offset == 0) {
-          data[sliderSelection] = filterData(results, widgetConfig);
+        data[sliderSelection] = results;
+        noMoreData = true; // Keine Paginierung für lokale Daten
+      }
+
+      // Fall 2: Daten kommen aus Supabase
+      else if (queryInfo != null) {
+        String selectString = 'id, ${queryInfo.orderByColumn}';
+        if (widgetConfig.dateColumnName != null) {
+          selectString = 'id, ${widgetConfig.dateColumnName}';
+        }
+
+        var query = Supabase.instance.client.from(queryInfo.table).select(selectString);
+
+        if (queryInfo.where != null) {
+          for (var where in queryInfo.where!) {
+            query = query.eq(where[0], where[1]);
+          }
+        }
+
+        if (queryInfo.filterByColumn != null && searchbarValue.isNotEmpty) {
+          List<String> filterColumns = queryInfo.filterByColumn!.split(',').map((e) => e.trim()).toList();
+          List<String> conditions = filterColumns.map((col) => '$col.ilike."$searchbarValue%"').toList();
+          query = query.or(conditions.join(','));
+        }
+
+        results = await query.order(queryInfo.orderByColumn, ascending: queryInfo.ascending, nullsFirst: false).range(offset, offset + limit - 1);
+
+        if (widgetConfig.dateColumnName != null) {
+          results = results.map((item) {
+            return {...item, 'date': item[widgetConfig.dateColumnName]};
+          }).toList();
+        }
+
+        if (results.isEmpty) {
+          noMoreData = true;
+          if (isSearch && isDataInitialized[sliderSelection]) {
+            data[sliderSelection].clear();
+          }
         } else {
-          data[sliderSelection].addAll(filterData(results, widgetConfig));
-        }
+          alreadyLoadedResults += results.length;
+          if (offset == 0) {
+            data[sliderSelection] = filterData(results, widgetConfig);
+          } else {
+            data[sliderSelection].addAll(filterData(results, widgetConfig));
+          }
 
-        data[sliderSelection] = deleteDuplicates(data[sliderSelection]);
-        preSelectedIndex = null;
-
-        offset += limit;
-
-        if (widget.changedOffset != null) {
-          widget.changedOffset!(offset);
+          data[sliderSelection] = deleteDuplicates(data[sliderSelection]);
+          preSelectedIndex = null;
+          offset += limit;
+          if (widget.changedOffset != null) widget.changedOffset!(offset);
         }
       }
 
@@ -399,14 +432,37 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
   Future<void> addItemWithId(int id) async {
     int selectedIndex = preSelectedIndex ?? sliderSelection;
     CustomListWidget widgetConfig = widget.widgets[selectedIndex];
-    QueryInfo queryInfo = widgetConfig.queryInfo;
+    QueryInfo? queryInfo = widgetConfig.queryInfo;
 
-    // Suchergebnisse zurücksetzen, wenn eine Suche aktiv ist
+    // Wenn bereits eine Suche läuft, zurücksetzen
     if (searchbarValue.isNotEmpty) {
       setState(() => searchbarValue = "");
       resetList();
       await load(withoutLoading: true);
     }
+
+    // Fall 1: Lokale Daten (ownDataList)
+    if (widgetConfig.ownDataList != null) {
+      // Finde den Eintrag mit der gegebenen ID in der lokalen Liste
+      final existing = widgetConfig.ownDataList!.firstWhere(
+        (item) => item['id'] == id,
+        orElse: () => {},
+      );
+
+      if (existing.isNotEmpty) {
+        setState(() {
+          data[selectedIndex].insert(0, existing);
+        });
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          scrollToWidgetWithId(id);
+        });
+      }
+      return;
+    }
+
+    // Fall 2: Supabase-Datenbankmodus
+    if (queryInfo == null) return;
 
     // Spalten definieren (id + optional Datum)
     String selectString = 'id';
@@ -414,10 +470,9 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
       selectString += ', ${widgetConfig.dateColumnName}';
     }
 
-    // Datenbankabfrage
     var query = supabase.from(queryInfo.table).select(selectString).eq('id', id);
 
-    // Falls ein WHERE-Filter definiert ist
+    // Falls zusätzliche WHERE-Bedingungen gesetzt sind
     if (queryInfo.where != null) {
       for (var where in queryInfo.where!) {
         if (where.length >= 2 && where[0] != null && where[1] != null) {
@@ -426,16 +481,16 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
       }
     }
 
-    // Sortierung und Paginierung
+    // Sortierung und nur 1 Ergebnis
     List<Map<String, dynamic>> result = await query
         .order(
           widgetConfig.dateColumnName ?? queryInfo.orderByColumn,
           ascending: queryInfo.ascending,
           nullsFirst: false,
         )
-        .range(0, 0); // Nur ein Ergebnis notwendig
+        .range(0, 0);
 
-    // Falls ein Item gefunden wurde
+    // Wenn das Item gefunden wurde
     if (result.isNotEmpty) {
       setState(() {
         var newItem = {'id': id, ...result[0]};
@@ -445,7 +500,6 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
         data[selectedIndex].insert(0, newItem);
       });
 
-      // Leichte Verzögerung für sanftes Scrollen
       Future.delayed(const Duration(milliseconds: 500), () {
         scrollToWidgetWithId(id);
       });

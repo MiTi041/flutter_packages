@@ -4,8 +4,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:crypto/crypto.dart';
 
-mixin class SupabaseHelper {
-  final SupabaseClient supabase = Supabase.instance.client;
+mixin SupabaseHelper {
+  /// Zugriff auf den Supabase-Client nur, wenn initialisiert.
+  SupabaseClient get supabase {
+    try {
+      return Supabase.instance.client;
+    } catch (_) {
+      throw Exception(
+        'Supabase wurde noch nicht initialisiert. '
+        'Bitte rufe SupabaseHelper.initialize() in main() auf.',
+      );
+    }
+  }
 
   /// Initialisiert Supabase (muss in main.dart einmalig aufgerufen werden)
   static Future<void> initialize({required String url, required String anonKey}) async {
@@ -13,17 +23,24 @@ mixin class SupabaseHelper {
   }
 
   User? getUser() {
-    return supabase.auth.currentUser;
+    try {
+      return supabase.auth.currentUser;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Echtzeit-Listener für Änderungen in einer beliebigen Tabelle
   void listenToTableUpdates({required String table, required List<String> primaryKey, required Function(List<Map<String, dynamic>>) onUpdate}) {
-    supabase.from(table).stream(primaryKey: primaryKey).listen((data) {
-      onUpdate(data.cast<Map<String, dynamic>>());
-    });
+    try {
+      supabase.from(table).stream(primaryKey: primaryKey).listen((data) {
+        onUpdate(data.cast<Map<String, dynamic>>());
+      });
+    } catch (e) {
+      log('Fehler beim Starten des Echtzeit-Listeners: $e');
+    }
   }
 
-  /// Benutzer mit E-Mail und Passwort registrieren
   Future<bool> signUp(String email, String password) async {
     try {
       final response = await supabase.auth.signUp(email: email, password: password);
@@ -34,7 +51,6 @@ mixin class SupabaseHelper {
     }
   }
 
-  /// Benutzeranmeldung
   Future<bool> signIn(String email, String password) async {
     try {
       final response = await supabase.auth.signInWithPassword(email: email, password: password);
@@ -45,9 +61,12 @@ mixin class SupabaseHelper {
     }
   }
 
-  /// Benutzer abmelden
   Future<void> signOut() async {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      log('Fehler beim Logout: $e');
+    }
   }
 
   Future<AuthResponse> signInWithApple() async {

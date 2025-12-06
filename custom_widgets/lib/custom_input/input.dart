@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:custom_widgets/constants.dart';
+import 'package:flutter/services.dart';
 
 class Input extends StatefulWidget {
   final String text;
@@ -22,6 +23,13 @@ class Input extends StatefulWidget {
   final bool isTextArea;
   final TextEditingController? controller;
   final String? initValue;
+  final TextAlign? textAlign;
+  final TextStyle? textStyle;
+  final double? hintSize;
+  final FontWeight? hintWeight;
+  final Color? hintColor;
+  final bool? showCursor;
+  final List<TextInputFormatter>? inputFormatters;
 
   const Input({
     required this.text,
@@ -42,6 +50,13 @@ class Input extends StatefulWidget {
     this.isTextArea = false,
     this.controller,
     this.initValue,
+    this.textAlign,
+    this.textStyle,
+    this.hintSize,
+    this.hintWeight,
+    this.hintColor,
+    this.showCursor,
+    this.inputFormatters,
     super.key,
   }) : assert(value == null || initValue == null);
 
@@ -87,8 +102,10 @@ class InputState extends State<Input> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final viewInsets = MediaQuery.of(context).viewInsets.bottom;
-      keyboardHeight = viewInsets;
+      if (mounted) {
+        final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+        keyboardHeight = viewInsets;
+      }
     });
   }
 
@@ -155,9 +172,11 @@ class InputState extends State<Input> {
         child: Stack(
           children: [
             TextField(
+              showCursor: widget.showCursor ?? true,
               cursorColor: constants.fontColor,
               autocorrect: false,
               keyboardType: widget.currency ? const TextInputType.numberWithOptions(decimal: true) : widget.keyboardType,
+              inputFormatters: widget.inputFormatters,
               onTapOutside: (value) {
                 setState(() {
                   isFocused = false;
@@ -206,7 +225,7 @@ class InputState extends State<Input> {
                 });
               },
               enabled: !widget.disabled,
-              textAlign: TextAlign.start,
+              textAlign: widget.textAlign ?? TextAlign.start,
               decoration: InputDecoration(
                 isDense: true,
                 contentPadding: EdgeInsets.only(
@@ -230,23 +249,24 @@ class InputState extends State<Input> {
                   height: 1,
                   overflow: TextOverflow.ellipsis,
                   fontFamily: constants.fontFamily,
-                  fontSize: constants.mediumFontSize,
-                  color: constants.subFontColor,
-                  fontWeight: constants.medium,
+                  fontSize: widget.hintSize ?? constants.mediumFontSize,
+                  color: widget.hintColor ?? constants.subFontColor,
+                  fontWeight: widget.hintWeight ?? constants.medium,
                 ),
                 //focusedBorder: OutlineInputBorder(borderRadius: widget.borderRadius, borderSide: BorderSide(color: constants.blue, width: 1)),
                 border: OutlineInputBorder(borderRadius: widget.borderRadius, borderSide: const BorderSide(width: 0, style: BorderStyle.none)),
               ),
               textAlignVertical: TextAlignVertical.center,
-              style: TextStyle(
-                decoration: TextDecoration.none,
-                decorationThickness: 0,
-                overflow: TextOverflow.fade,
-                fontFamily: constants.fontFamily,
-                fontSize: constants.semibigFontSize,
-                color: constants.fontColor.withValues(alpha: widget.disabled ? 0.5 : 1),
-                fontWeight: constants.semi,
-              ),
+              style: widget.textStyle ??
+                  TextStyle(
+                    decoration: TextDecoration.none,
+                    decorationThickness: 0,
+                    overflow: TextOverflow.fade,
+                    fontFamily: constants.fontFamily,
+                    fontSize: constants.semibigFontSize,
+                    color: constants.fontColor.withValues(alpha: widget.disabled ? 0.5 : 1),
+                    fontWeight: constants.semi,
+                  ),
             ),
             if (widget.icon != null && !widget.isTextArea) ...[
               Positioned(

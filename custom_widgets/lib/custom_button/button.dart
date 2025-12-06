@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 class Button extends StatefulWidget {
   final Color? color;
   final String? text;
+  final TextStyle? textStyle;
   final bool loader;
   final bool minWidth;
   final BorderRadius borderRadius;
@@ -24,6 +25,7 @@ class Button extends StatefulWidget {
 
   const Button({
     this.text,
+    this.textStyle,
     this.color,
     this.loader = false,
     this.deactivated = false,
@@ -134,13 +136,14 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
                                 Text(
                                   widget.text!,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    height: 1,
-                                    fontFamily: constants.fontFamily,
-                                    fontSize: constants.mediumFontSize,
-                                    color: widget.fontColor ?? constants.fontColor,
-                                    fontWeight: constants.medium,
-                                  ),
+                                  style: widget.textStyle ??
+                                      TextStyle(
+                                        height: 1,
+                                        fontFamily: constants.fontFamily,
+                                        fontSize: constants.mediumFontSize,
+                                        color: widget.fontColor ?? constants.fontColor,
+                                        fontWeight: constants.medium,
+                                      ),
                                 ),
                               ],
                             ),

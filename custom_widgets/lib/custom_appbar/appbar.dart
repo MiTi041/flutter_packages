@@ -7,7 +7,10 @@ import 'package:gap/gap.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:provider/provider.dart';
 
+enum AppbarThemes { Normal, LiquidGlass }
+
 class Appbar extends StatefulWidget {
+  final AppbarThemes theme;
   final String? titel;
   final Widget? icon;
   final List<Widget>? actions;
@@ -16,8 +19,20 @@ class Appbar extends StatefulWidget {
   final double opacity;
   final bool showBackButton;
   final double blurValue;
+  final VoidCallback? goBack;
 
-  const Appbar({this.titel, this.icon, this.actions, this.userId, this.isModalPopup = false, this.opacity = 0.0, this.showBackButton = false, this.blurValue = 0.3, super.key});
+  const Appbar(
+      {this.theme = AppbarThemes.Normal,
+      this.titel,
+      this.icon,
+      this.actions,
+      this.userId,
+      this.isModalPopup = false,
+      this.opacity = 0.0,
+      this.showBackButton = false,
+      this.blurValue = 0.3,
+      this.goBack,
+      super.key});
 
   @override
   AppbarState createState() => AppbarState();
@@ -77,8 +92,12 @@ class AppbarState extends State<Appbar> with Navigate {
 
     return GestureDetector(
       onLongPress: () {
-        Vibrate().vibrateLight();
-        Navigator.popUntil(context, (route) => route.isFirst);
+        if (widget.goBack != null) {
+          widget.goBack?.call();
+        } else if (widget.showBackButton) {
+          Vibrate().vibrateLight();
+          Navigator.popUntil(context, (route) => route.isFirst);
+        }
       },
       child: Stack(
         children: [
@@ -127,13 +146,17 @@ class AppbarState extends State<Appbar> with Navigate {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (!widget.isModalPopup && widget.showBackButton) ...[
+                      if (!widget.isModalPopup && (widget.showBackButton || widget.goBack != null)) ...[
                         GestureDetector(
                           onTap: () {
-                            if (Navigator.canPop(context)) {
-                              Navigator.pop(context);
+                            if (widget.goBack != null) {
+                              widget.goBack?.call();
                             } else {
-                              Navigator.pushReplacementNamed(context, '/');
+                              if (Navigator.canPop(context)) {
+                                Navigator.pop(context);
+                              } else {
+                                Navigator.pushReplacementNamed(context, '/');
+                              }
                             }
                           },
                           child: Container(

@@ -64,14 +64,14 @@ class ItemState extends State<Item> with SingleTickerProviderStateMixin, Vibrate
             width: double.infinity,
             decoration: BoxDecoration(
               color: constants.primary,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(22),
               border: widget.border ??
                   Border.all(
                     color: constants.secondary,
                     width: 0.5,
                   ),
             ),
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,

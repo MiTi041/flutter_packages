@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:custom_widgets/custom_list/refresh_provider.dart';
 import 'package:custom_utils/custom_supabaseHelper.dart';
@@ -91,6 +92,7 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
   late double spacing;
   late double itemWidth;
   bool isSearchbarLoading = false;
+  Timer? _searchDebounce;
   final Map<int, GlobalKey> itemKeys = {};
   final Map<int, AnimationController> slideControllers = {};
   final Map<int, Animation<Offset>> slideAnimations = {};
@@ -147,6 +149,7 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     if (widget.useRefreshProvider) {
       refreshProvider.removeListener(refreshProviderListener);
     }
@@ -240,7 +243,7 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
 
         if (queryInfo.filterByColumn != null && searchbarValue.isNotEmpty) {
           List<String> filterColumns = queryInfo.filterByColumn!.split(',').map((e) => e.trim()).toList();
-          List<String> conditions = filterColumns.map((col) => '$col.ilike."$searchbarValue%"').toList();
+          List<String> conditions = filterColumns.map((col) => '$col.ilike."%$searchbarValue%"').toList();
           query = query.or(conditions.join(','));
         }
 
@@ -381,22 +384,31 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
     itemWidth = (size.width - 30 - (spacing * (n - 1))) / n;
   }
 
-  void search(String value) async {
+  void search(String value) {
     if (widget.isSearching != null) {
       widget.isSearching!(value.isNotEmpty);
     }
     setState(() {
       searchbarValue = value;
+    });
+
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 500), () => _runSearch(value));
+  }
+
+  Future<void> _runSearch(String value) async {
+    setState(() {
       isSearchbarLoading = true;
     });
 
     resetList();
-
     await load(withoutLoading: true, isSearch: true);
 
-    setState(() {
-      isSearchbarLoading = false;
-    });
+    if (searchbarValue == value) {
+      setState(() {
+        isSearchbarLoading = false;
+      });
+    }
   }
 
   void select(int value) async {
@@ -592,10 +604,7 @@ class CustomListState extends State<CustomList> with TickerProviderStateMixin, S
               isLoading: isSearchbarLoading,
               onOpenFocus: widget.searchbarOnOpenFocus,
               placeholder: widget.widgets[sliderSelection].searchbarPlaceholder ?? 'Suchen',
-              input: (String value) {
-                search(value);
-                return value;
-              },
+              input: (String value) => search(value),
             ),
           if (siteSelectionItems.length > 1) ...[
             const Gap(10),

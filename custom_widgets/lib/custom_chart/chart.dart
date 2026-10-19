@@ -13,6 +13,8 @@ class Chart extends StatefulWidget {
   final Future<List<FlSpot>> Function()? loadData;
   final bool showChangeRate;
   final bool showStats;
+  final double? maxY;
+  final Map<int, String>? yEmojis;
 
   const Chart({
     super.key,
@@ -22,6 +24,8 @@ class Chart extends StatefulWidget {
     this.loadData,
     this.showChangeRate = true,
     this.showStats = true,
+    this.maxY,
+    this.yEmojis,
   });
 
   @override
@@ -70,16 +74,30 @@ class ChartState extends State<Chart> {
       chartData = await widget.loadData!();
     }
 
-    average = chartData.isEmpty ? 0 : chartData.map((spot) => spot.y).reduce((sum, value) => sum + value) / chartData.length;
-    maxValue = chartData.isEmpty ? 0 : chartData.map((spot) => spot.y).reduce((max, value) => value > max ? value : max);
-    minValue = chartData.isEmpty ? 0 : chartData.map((spot) => spot.y).reduce((min, value) => value < min ? value : min);
+    average = chartData.isEmpty
+        ? 0
+        : chartData.map((spot) => spot.y).reduce((sum, value) => sum + value) /
+            chartData.length;
+    maxValue = chartData.isEmpty
+        ? 0
+        : chartData
+            .map((spot) => spot.y)
+            .reduce((max, value) => value > max ? value : max);
+    minValue = chartData.isEmpty
+        ? 0
+        : chartData
+            .map((spot) => spot.y)
+            .reduce((min, value) => value < min ? value : min);
 
     if (chartData.length > 1) {
-      double previousValue = chartData[chartData.length - 2].y; // Wert des vorletzten Eintrags
+      double previousValue =
+          chartData[chartData.length - 2].y; // Wert des vorletzten Eintrags
       double currentValue = chartData.last.y; // Wert des letzten Eintrags
 
       // Berechnung des prozentualen Anstiegs
-      changeRate = previousValue == 0 ? 0 : ((currentValue - previousValue) / previousValue) * 100;
+      changeRate = previousValue == 0
+          ? 0
+          : ((currentValue - previousValue) / previousValue) * 100;
     } else {
       changeRate = 0;
     }
@@ -90,18 +108,30 @@ class ChartState extends State<Chart> {
   }
 
   // Functions
+  String formatValue(double value) => value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toStringAsFixed(1);
+
+  String? emojiFor(double value) {
+    final emojis = widget.yEmojis;
+    if (emojis == null || emojis.isEmpty) return null;
+    final key =
+        value.round().clamp(emojis.keys.first, emojis.keys.last).toInt();
+    return emojis[key];
+  }
+
+  String formatStat(String label, double value) {
+    final emoji = emojiFor(value);
+    return "$label: ${emoji == null ? "" : "$emoji "}${value.toStringAsFixed(1)}";
+  }
 
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        isLoading
-            ? Skeleton(height: 170)
-            : Item(
+    return isLoading
+        ? Skeleton(height: 170)
+        : Item(
                 titel: widget.titel,
                 subTitel: widget.description,
                 content: [
@@ -126,7 +156,7 @@ class ChartState extends State<Chart> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
-                                        'Durchschnitt: ${average.toStringAsFixed(1)}',
+                                        formatStat('Durchschnitt', average),
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           height: 1,
@@ -144,7 +174,7 @@ class ChartState extends State<Chart> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
-                                        'Maximal:  ${maxValue.toStringAsFixed(1)}',
+                                        formatStat('Maximal', maxValue),
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           height: 1,
@@ -162,7 +192,7 @@ class ChartState extends State<Chart> {
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
-                                        'Minimum:  ${minValue.toStringAsFixed(1)}',
+                                        formatStat('Minimum', minValue),
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           height: 1,
@@ -178,7 +208,8 @@ class ChartState extends State<Chart> {
                                         padding: const EdgeInsets.all(5),
                                         decoration: BoxDecoration(
                                           color: constants.secondary,
-                                          borderRadius: BorderRadius.circular(6),
+                                          borderRadius:
+                                              BorderRadius.circular(6),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -188,20 +219,36 @@ class ChartState extends State<Chart> {
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 height: 1,
-                                                fontFamily: constants.fontFamily,
-                                                fontSize: constants.mediumFontSize,
+                                                fontFamily:
+                                                    constants.fontFamily,
+                                                fontSize:
+                                                    constants.mediumFontSize,
                                                 color: changeRate > 0
                                                     ? constants.green
                                                     : changeRate < 0
                                                         ? constants.red
-                                                        : constants.subFontColor,
+                                                        : constants
+                                                            .subFontColor,
                                                 fontWeight: constants.medium,
                                               ),
                                             ),
                                             const Gap(5),
-                                            if (changeRate > 0) Icon(CupertinoIcons.arrow_up_right, size: 12, color: constants.green),
-                                            if (changeRate < 0) Icon(CupertinoIcons.arrow_down_right, size: 12, color: constants.red),
-                                            if (changeRate == 0) Icon(CupertinoIcons.minus, size: 12, color: constants.subFontColor),
+                                            if (changeRate > 0)
+                                              Icon(
+                                                  CupertinoIcons.arrow_up_right,
+                                                  size: 12,
+                                                  color: constants.green),
+                                            if (changeRate < 0)
+                                              Icon(
+                                                  CupertinoIcons
+                                                      .arrow_down_right,
+                                                  size: 12,
+                                                  color: constants.red),
+                                            if (changeRate == 0)
+                                              Icon(CupertinoIcons.minus,
+                                                  size: 12,
+                                                  color:
+                                                      constants.subFontColor),
                                           ],
                                         ),
                                       ),
@@ -211,24 +258,28 @@ class ChartState extends State<Chart> {
                               const Gap(10),
                             ],
                             SizedBox(
-                              height: 100,
+                              height: widget.yEmojis == null ? 100 : 130,
                               child: LineChart(
                                 LineChartData(
                                   lineTouchData: LineTouchData(
                                     enabled: true,
                                     touchTooltipData: LineTouchTooltipData(
-                                      tooltipBorder: BorderSide(color: constants.third, width: 1),
-                                      getTooltipColor: (LineBarSpot touchedSpots) {
+                                      tooltipBorder: BorderSide(
+                                          color: constants.third, width: 1),
+                                      getTooltipColor:
+                                          (LineBarSpot touchedSpots) {
                                         return constants.secondary;
                                       },
-                                      getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                                      getTooltipItems:
+                                          (List<LineBarSpot> touchedSpots) {
                                         return touchedSpots.map((touchedSpot) {
                                           return LineTooltipItem(
-                                            "${touchedSpot.y.toInt()} ${widget.unitName ?? ""}",
+                                            "${formatValue(touchedSpot.y)} ${widget.unitName ?? ""}",
                                             TextStyle(
                                               height: 1,
                                               color: constants.fontColor,
-                                              fontSize: constants.mediumFontSize,
+                                              fontSize:
+                                                  constants.mediumFontSize,
                                               fontFamily: constants.fontFamily,
                                               fontWeight: constants.medium,
                                             ),
@@ -238,21 +289,56 @@ class ChartState extends State<Chart> {
                                     ),
                                   ),
                                   titlesData: FlTitlesData(
-                                    show: false,
-                                  ), // to disable all tiles in graph
+                                    show: widget.yEmojis != null,
+                                    topTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    rightTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    bottomTitles: const AxisTitles(
+                                      sideTitles: SideTitles(showTitles: false),
+                                    ),
+                                    leftTitles: AxisTitles(
+                                      sideTitles: SideTitles(
+                                        showTitles: true,
+                                        interval: 1,
+                                        reservedSize: 24,
+                                        getTitlesWidget: (value, _) {
+                                          final emoji =
+                                              widget.yEmojis?[value.round()];
+                                          if (emoji == null ||
+                                              value != value.roundToDouble()) {
+                                            return const SizedBox.shrink();
+                                          }
+                                          return Text(
+                                            emoji,
+                                            style: const TextStyle(
+                                              height: 1,
+                                              fontSize: 14,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
                                   gridData: FlGridData(
                                     show: true,
                                     drawVerticalLine: false,
-                                    horizontalInterval: (maxValue / 5).clamp(1, double.infinity),
+                                    horizontalInterval: (maxValue / 5)
+                                        .clamp(1, double.infinity),
                                   ),
                                   borderData: FlBorderData(
                                     show: true,
-                                    border: Border.all(color: constants.secondary, width: 1),
+                                    border: Border.all(
+                                        color: constants.secondary, width: 1),
                                   ),
                                   minX: 0,
-                                  maxX: chartData.isNotEmpty ? chartData.length - 1 : 1,
+                                  maxX: chartData.isNotEmpty
+                                      ? chartData.length - 1
+                                      : 1,
                                   minY: 0,
-                                  maxY: maxValue + maxValue / 6,
+                                  maxY: widget.maxY ?? maxValue + maxValue / 6,
                                   lineBarsData: [
                                     LineChartBarData(
                                       spots: chartData,
@@ -263,7 +349,11 @@ class ChartState extends State<Chart> {
                                       belowBarData: BarAreaData(
                                         show: true,
                                         gradient: LinearGradient(
-                                          colors: [constants.blue.withValues(alpha: 0.3), CupertinoColors.transparent],
+                                          colors: [
+                                            constants.blue
+                                                .withValues(alpha: 0.3),
+                                            CupertinoColors.transparent
+                                          ],
                                           begin: Alignment.topCenter,
                                           end: Alignment.bottomCenter,
                                         ),
@@ -275,9 +365,7 @@ class ChartState extends State<Chart> {
                             ),
                           ],
                         ),
-                ],
-              ),
-      ],
-    );
+              ],
+            );
   }
 }

@@ -133,17 +133,20 @@ class ButtonState extends State<Button> with SingleTickerProviderStateMixin, Vib
                               mainAxisAlignment: widget.spaceBetweenTextAndIcon ? MainAxisAlignment.start : MainAxisAlignment.center,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  widget.text!,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: widget.textStyle ??
-                                      TextStyle(
-                                        height: 1,
-                                        fontFamily: constants.fontFamily,
-                                        fontSize: constants.mediumFontSize,
-                                        color: widget.fontColor ?? constants.fontColor,
-                                        fontWeight: constants.medium,
-                                      ),
+                                Flexible(
+                                  child: Text(
+                                    widget.text!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: widget.textStyle ??
+                                        TextStyle(
+                                          height: 1,
+                                          fontFamily: constants.fontFamily,
+                                          fontSize: constants.mediumFontSize,
+                                          color: widget.fontColor ?? constants.fontColor,
+                                          fontWeight: constants.medium,
+                                        ),
+                                  ),
                                 ),
                               ],
                             ),

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class Searchbar extends StatefulWidget {
   final String placeholder;
-  final String Function(String)? input;
+  final void Function(String)? input;
   final bool onOpenFocus;
   final bool isLoading;
   final String? value;
@@ -16,41 +16,36 @@ class Searchbar extends StatefulWidget {
 }
 
 class SearchbarState extends State<Searchbar> {
-  // variablen
+  // Variables
   bool isFocused = false;
   String inputText = "";
 
-  // instanzen
-  final controller = TextEditingController();
+  // Instances
+  final TextEditingController controller = TextEditingController();
   final FocusNode focusNode = FocusNode();
 
-  // standart
+  // Standard
   @override
   void initState() {
     super.initState();
 
     if (widget.value != null) {
-      setState(() {
-        controller.text = widget.value!;
-        inputText = widget.value!;
-      });
+      controller.text = widget.value!;
+      inputText = widget.value!;
     }
 
+    focusNode.addListener(_onFocusChange);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.onOpenFocus) {
-        FocusScope.of(context).requestFocus(focusNode);
+      if (widget.onOpenFocus && mounted) {
+        focusNode.requestFocus();
       }
-      load();
     });
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   void dispose() {
+    focusNode.removeListener(_onFocusChange);
     controller.dispose();
     focusNode.dispose();
     super.dispose();
@@ -59,125 +54,138 @@ class SearchbarState extends State<Searchbar> {
   @override
   void didUpdateWidget(covariant Searchbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
-      if (widget.value != null) {
-        setState(() {
-          controller.text = widget.value!;
-          inputText = widget.value!;
-        });
-      }
+
+    if (oldWidget.value != widget.value && widget.value != null) {
+      controller.text = widget.value!;
+      setState(() {
+        inputText = widget.value!;
+      });
     }
   }
 
-  load() async {}
+  // Functions
+  void _onFocusChange() {
+    if (isFocused != focusNode.hasFocus) {
+      setState(() {
+        isFocused = focusNode.hasFocus;
+      });
+    }
+  }
 
-  //functions
+  void _clear({bool keepFocus = true}) {
+    controller.clear();
+    widget.input?.call("");
+    setState(() {
+      inputText = "";
+    });
+
+    if (keepFocus) {
+      focusNode.requestFocus();
+    } else {
+      focusNode.unfocus();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final Constants constants = Constants();
-    final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
-    return Container(
-      margin: const EdgeInsets.only(left: 0, right: 0, bottom: 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Focus(
-              onFocusChange: (hasFocus) {
-                setState(() {
-                  isFocused = hasFocus;
-                });
-              },
-              child: Stack(
-                children: [
-                  TextField(
-                    onTapOutside: (event) {
-                      focusNode.unfocus();
-                    },
-                    controller: controller,
-                    minLines: 1,
-                    maxLines: 1,
-                    focusNode: focusNode,
-                    onChanged: (value) {
-                      if (widget.input != null) {
-                        widget.input!(value);
-                      }
-                      setState(() {
-                        inputText = value;
-                      });
-                    },
-                    textAlign: TextAlign.start,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: const EdgeInsets.only(left: 35, top: 14, bottom: 14, right: 35),
-                      fillColor: constants.secondary,
-                      filled: true,
-                      counterText: '',
-                      labelText: widget.placeholder,
-                      labelStyle: TextStyle(
-                        height: 1,
-                        overflow: TextOverflow.ellipsis,
-                        fontFamily: constants.fontFamily,
-                        fontSize: constants.regularFontSize,
-                        color: constants.subFontColor,
-                        fontWeight: constants.medium,
-                      ),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0), borderSide: BorderSide(color: constants.blue, width: 1)),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0), borderSide: const BorderSide(width: 0, style: BorderStyle.none)),
-                    ),
-                    textAlignVertical: TextAlignVertical.center,
-                    style: TextStyle(
-                      height: 1,
-                      decoration: TextDecoration.none,
-                      decorationThickness: 0,
-                      overflow: TextOverflow.fade,
-                      fontFamily: constants.fontFamily,
-                      fontSize: constants.mediumFontSize,
-                      color: constants.fontColor,
-                      fontWeight: constants.medium,
-                    ),
+    return Row(
+      children: [
+        Expanded(
+          child: Stack(
+            children: [
+              TextField(
+                controller: controller,
+                focusNode: focusNode,
+                minLines: 1,
+                maxLines: 1,
+                textInputAction: TextInputAction.search,
+                autocorrect: false,
+                enableSuggestions: false,
+                cursorColor: constants.blue,
+                onTapOutside: (event) => focusNode.unfocus(),
+                onChanged: (value) {
+                  widget.input?.call(value);
+                  setState(() {
+                    inputText = value;
+                  });
+                },
+                textAlignVertical: TextAlignVertical.center,
+                style: TextStyle(
+                  height: 1.2,
+                  fontFamily: constants.fontFamily,
+                  fontSize: constants.mediumFontSize,
+                  color: constants.fontColor,
+                  fontWeight: constants.medium,
+                ),
+                decoration: InputDecoration(
+                  isDense: true,
+                  filled: true,
+                  fillColor: constants.secondary,
+                  counterText: '',
+                  hintText: widget.placeholder,
+                  hintMaxLines: 1,
+                  hintStyle: TextStyle(
+                    height: 1.5,
+                    overflow: TextOverflow.ellipsis,
+                    fontFamily: constants.fontFamily,
+                    fontSize: constants.regularFontSize,
+                    color: constants.subFontColor,
+                    fontWeight: constants.medium,
                   ),
-                  Positioned(left: 10, top: 10, bottom: 10, child: Icon(CupertinoIcons.search, color: constants.fontColor, size: 20)),
-                  if (inputText != "")
-                    Positioned(
-                      right: 10,
-                      top: 10,
-                      bottom: 10,
-                      child: widget.isLoading
-                          ? CupertinoActivityIndicator(radius: 10, color: constants.fontColor)
-                          : GestureDetector(
-                              onTap: () {
-                                controller.text = "";
-                                if (widget.input != null) {
-                                  widget.input!("");
-                                }
-                                setState(() {
-                                  inputText = "";
-                                });
-                                FocusScope.of(context).requestFocus(focusNode);
-                              },
-                              child: Icon(CupertinoIcons.clear_thick_circled, color: constants.fontColor, size: 20),
-                            ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          if (isFocused)
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(15, 10, 0, 10),
-                color: const Color.fromARGB(0, 0, 0, 0),
-                child: Text(
-                  "Abbrechen",
-                  style: TextStyle(height: 1, fontFamily: constants.fontFamily, fontSize: constants.mediumFontSize, color: constants.subFontColor, fontWeight: constants.medium),
+                  contentPadding: const EdgeInsets.only(left: 35, top: 14, bottom: 14, right: 35),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: constants.blue, width: 1)),
                 ),
               ),
-            ),
-        ],
-      ),
+              Positioned(left: 10, top: 10, bottom: 10, child: Icon(CupertinoIcons.search, color: constants.fontColor, size: 20)),
+              if (inputText != "")
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  bottom: 10,
+                  child: widget.isLoading
+                      ? CupertinoActivityIndicator(radius: 10, color: constants.fontColor)
+                      : GestureDetector(
+                          onTap: _clear,
+                          child: Icon(CupertinoIcons.clear_thick_circled, color: constants.fontColor, size: 20),
+                        ),
+                ),
+            ],
+          ),
+        ),
+
+        // Abbrechen
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.centerRight,
+          child: isFocused
+              ? TextFieldTapRegion(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _clear(keepFocus: false),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 10, 0, 10),
+                      child: Text(
+                        "Abbrechen",
+                        maxLines: 1,
+                        style: TextStyle(
+                          height: 1,
+                          fontFamily: constants.fontFamily,
+                          fontSize: constants.mediumFontSize,
+                          color: constants.subFontColor,
+                          fontWeight: constants.medium,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 }

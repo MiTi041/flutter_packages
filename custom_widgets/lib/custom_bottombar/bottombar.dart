@@ -12,11 +12,13 @@ class Bottombar extends StatefulWidget {
   final List<BottombarItem> items;
   final double blurValue;
   final BottombarThemes theme;
+  final int? selectedIndex;
 
   const Bottombar({
     required this.items,
     this.blurValue = 0.3,
     this.theme = BottombarThemes.Normal,
+    this.selectedIndex,
     super.key,
   });
 
@@ -65,6 +67,19 @@ class BottombarState extends State<Bottombar> with Vibrate, SingleTickerProvider
       getHeight();
       load();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant Bottombar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.selectedIndex != null && widget.selectedIndex != selectedIndex) {
+      setState(() => selectedIndex = widget.selectedIndex!);
+
+      _targetX = selectedIndex * _itemWidth;
+      _animation = Tween<double>(begin: _indicatorX, end: _targetX).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+      _controller.forward(from: 0);
+    }
   }
 
   @override

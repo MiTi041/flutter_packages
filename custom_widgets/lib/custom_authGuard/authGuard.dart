@@ -23,7 +23,6 @@ class AuthGuardState extends State<AuthGuard> {
   // Variables
   bool isAuthenticated = false;
   bool isChecking = true;
-  int authTryCount = 0;
 
   // Instances
   final LocalAuthentication auth = LocalAuthentication();
@@ -68,7 +67,6 @@ class AuthGuardState extends State<AuthGuard> {
         isChecking = false;
       });
     } else {
-      authTryCount++;
       setState(() {
         isChecking = false;
       });
@@ -103,26 +101,13 @@ class AuthGuardState extends State<AuthGuard> {
             child: EmptyState(
                 illustration: const Text('🚨', textAlign: TextAlign.center, style: TextStyle(fontSize: 50)),
                 title: "Authentifizierung fehlgeschlagen",
-                text: authTryCount < 2 ? "Bitte authentifiziere dich erneut" : "",
+                text: "Bitte authentifiziere dich erneut",
                 button: [
-                  if (authTryCount < 2)
-                    Button(
-                      text: 'Erneut versuchen',
-                      color: constants.blue,
-                      click: () {
-                        authenticateUser();
-                      },
-                    ),
                   Button(
-                    text: 'Zurück',
-                    color: constants.primary,
-                    border: Border.all(color: constants.secondary, width: 1),
+                    text: 'Erneut versuchen',
+                    color: constants.blue,
                     click: () {
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      } else {
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      }
+                      authenticateUser();
                     },
                   ),
                 ]),

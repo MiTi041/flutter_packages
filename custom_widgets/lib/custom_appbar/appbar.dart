@@ -90,6 +90,18 @@ class AppbarState extends State<Appbar> with Navigate {
     final size = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
     final frameProvider = Provider.of<FrameProvider>(context, listen: true);
 
+    final actions = widget.actions != null && widget.actions!.isNotEmpty
+        ? Wrap(
+            runAlignment: WrapAlignment.center,
+            alignment: WrapAlignment.end,
+            spacing: 10,
+            runSpacing: 10,
+            children: widget.actions!.map((action) {
+              return IntrinsicWidth(child: action);
+            }).toList(),
+          )
+        : Container(height: 30, width: 30, color: CupertinoColors.transparent);
+
     return GestureDetector(
       onLongPress: () {
         if (widget.goBack != null) {
@@ -141,8 +153,8 @@ class AppbarState extends State<Appbar> with Navigate {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.isModalPopup) Expanded(child: Container()),
-                Expanded(
+                if (widget.isModalPopup) const SizedBox(width: 30),
+                Flexible(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -174,10 +186,12 @@ class AppbarState extends State<Appbar> with Navigate {
                           children: [
                             if (widget.icon != null) ...[SizedBox(height: 20, child: widget.icon), const Gap(10)],
                             if (widget.titel != null)
-                              Flexible(
+                              Expanded(
+                                flex: 3,
                                 child: Text(
                                   widget.titel!,
                                   overflow: TextOverflow.ellipsis,
+                                  textAlign: widget.isModalPopup ? TextAlign.center : null,
                                   style: TextStyle(
                                     height: 1,
                                     fontFamily: constants.fontFamily,
@@ -193,19 +207,7 @@ class AppbarState extends State<Appbar> with Navigate {
                     ],
                   ),
                 ),
-                Expanded(
-                  child: widget.actions != null && widget.actions!.isNotEmpty
-                      ? Wrap(
-                          runAlignment: WrapAlignment.center,
-                          alignment: WrapAlignment.end,
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: widget.actions!.map((action) {
-                            return IntrinsicWidth(child: action);
-                          }).toList(),
-                        )
-                      : Container(height: 30, width: 30, color: CupertinoColors.transparent),
-                ),
+                widget.isModalPopup ? actions : Expanded(child: actions),
               ],
             ),
           ),

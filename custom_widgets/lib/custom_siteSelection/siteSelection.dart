@@ -141,6 +141,7 @@ class SiteSelectionState extends State<SiteSelection> {
       maxLines: 1,
       textDirection: TextDirection.ltr,
     )..layout();
+
     return textPainter.width + 5;
   }
 }

@@ -5,6 +5,7 @@ class SiteSelectionItem {
   final IconData iconActive;
   final IconData iconInactive;
   final Color? color;
+  final bool showIndicator;
 
-  SiteSelectionItem({required this.text, required this.iconActive, required this.iconInactive, this.color});
+  SiteSelectionItem({required this.text, required this.iconActive, required this.iconInactive, this.color, this.showIndicator = false});
 }

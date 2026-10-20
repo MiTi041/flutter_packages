@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:custom_widgets/constants.dart';
 import 'package:flutter/services.dart';
 
@@ -132,17 +133,20 @@ class InputState extends State<Input> {
 
   void _startKeyboardCheckTimer() {
     _scrollTimer?.cancel();
+    int idleTicks = 0;
+
     _scrollTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       final viewInsets = MediaQuery.of(context).viewInsets.bottom;
       if (viewInsets > 0) {
+        idleTicks = 0;
         if (viewInsets == keyboardHeight) {
           // Keyboard is fully expanded, perform scroll
           scrollToInput();
           _scrollTimer?.cancel();
         }
         keyboardHeight = viewInsets;
-      } else {
-        // Keyboard is not visible
+      } else if (++idleTicks >= 10) {
+        // No keyboard appeared (e.g. hardware keyboard)
         _scrollTimer?.cancel();
       }
     });
@@ -151,9 +155,25 @@ class InputState extends State<Input> {
   void scrollToInput() {
     final scrollable = Scrollable.of(context);
     final renderObject = context.findRenderObject();
+    final viewport = renderObject == null ? null : RenderAbstractViewport.of(renderObject);
 
-    if (renderObject != null) {
-      scrollable.position.ensureVisible(renderObject, alignment: 0.5, duration: const Duration(milliseconds: 300));
+    if (renderObject == null || viewport == null) return;
+
+    final position = scrollable.position;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+    final revealBottom = viewport.getOffsetToReveal(renderObject, 1).offset;
+    final revealTop = viewport.getOffsetToReveal(renderObject, 0).offset;
+    var target = revealBottom + keyboardHeight;
+    if (target > revealTop) target = revealTop;
+    target = target.clamp(position.minScrollExtent, position.maxScrollExtent);
+
+    if (target > position.pixels) {
+      position.animateTo(
+        target.toDouble(),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -175,7 +195,12 @@ class InputState extends State<Input> {
               showCursor: widget.showCursor ?? true,
               cursorColor: constants.fontColor,
               autocorrect: false,
-              keyboardType: widget.currency ? const TextInputType.numberWithOptions(decimal: true) : widget.keyboardType,
+              keyboardType: widget.currency
+                  ? const TextInputType.numberWithOptions(decimal: true)
+                  : widget.isTextArea
+                      ? TextInputType.multiline
+                      : widget.keyboardType,
+              textInputAction: widget.isTextArea ? TextInputAction.newline : null,
               inputFormatters: widget.inputFormatters,
               onTapOutside: (value) {
                 setState(() {

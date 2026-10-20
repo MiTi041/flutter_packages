@@ -82,6 +82,17 @@ class SiteSelectionState extends State<SiteSelection> {
           int index = entry.key;
           SiteSelectionItem item = entry.value;
 
+          final double collapsedWidth = collapsedWidthOf(item);
+          final double selectedWidth = (size.width - 30).clamp(0, 500).toDouble() -
+              widget.items.asMap().entries.where((other) => other.key != index).fold<double>(
+                    0,
+                    (sum, other) =>
+                        sum +
+                        collapsedWidthOf(other.value) +
+                        (other.key == widget.items.length - 1 ? 0 : 5),
+                  ) -
+              (index == widget.items.length - 1 ? 0 : 5);
+
           return GestureDetector(
             onTap: () {
               select(index);
@@ -89,7 +100,7 @@ class SiteSelectionState extends State<SiteSelection> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.fastOutSlowIn,
-              width: sliderSelection == index ? ((size.width - 30).clamp(0, 500) - (widget.items.length - 1) * 52) : 47,
+              width: sliderSelection == index ? selectedWidth : collapsedWidth,
               margin: EdgeInsets.only(right: entry.key == widget.items.length - 1 ? 0 : 5),
               padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
               decoration: BoxDecoration(
@@ -103,6 +114,10 @@ class SiteSelectionState extends State<SiteSelection> {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Icon(sliderSelection == index ? item.iconActive : item.iconInactive, size: 17, color: sliderSelection == index ? constants.fontColor : constants.subFontColor),
+                    if (item.showIndicator && sliderSelection != index) ...[
+                      const SizedBox(width: 3),
+                      indicator(constants),
+                    ],
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.fastOutSlowIn,
@@ -123,12 +138,31 @@ class SiteSelectionState extends State<SiteSelection> {
                         ),
                       ),
                     ),
+                    if (item.showIndicator && sliderSelection == index) ...[
+                      const SizedBox(width: 5),
+                      indicator(constants),
+                    ],
                   ],
                 ),
               ),
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  double collapsedWidthOf(SiteSelectionItem item) {
+    return 47.0 + (item.showIndicator ? 9.0 : 0.0);
+  }
+
+  Widget indicator(Constants constants) {
+    return Container(
+      width: 6,
+      height: 6,
+      decoration: BoxDecoration(
+        color: constants.orange,
+        shape: BoxShape.circle,
       ),
     );
   }
